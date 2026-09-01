@@ -1,10 +1,12 @@
 import {
   configureInteraction,
+  confirmPendingProposal,
   createInitialState,
   getApplicationReview,
   getApplicationStep,
   openReview,
-  recordConfirmedAnswer,
+  proposeAnswer,
+  rejectPendingProposal,
   setHumanAnswer,
   submitApplication,
   type ApplicationState,
@@ -40,8 +42,14 @@ export const applicationStore = {
   setHumanAnswer(questionId: QuestionId, value: string) {
     return publish(setHumanAnswer(state, questionId, value))
   },
-  recordAgentAnswer(input: { questionId: string; value: unknown; confirmed: unknown }) {
-    return publish(recordConfirmedAnswer(state, input, 'agent'))
+  proposeAgentAnswer(input: { questionId: string; value: unknown }) {
+    return publish(proposeAnswer(state, input, 'agent'))
+  },
+  confirmAgentProposal() {
+    return publish(confirmPendingProposal(state))
+  },
+  rejectAgentProposal() {
+    return publish(rejectPendingProposal(state))
   },
   openReview() {
     return publish(openReview(state))

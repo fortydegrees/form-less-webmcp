@@ -313,6 +313,72 @@ h2 {
   font-size: 0.88rem;
 }
 
+.proposal-panel {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 18px;
+  margin: -16px 0 34px;
+  padding: 26px;
+  border: 3px solid #9a6d00;
+  border-radius: 4px;
+  background: #fff9e7;
+  box-shadow: 0 12px 32px rgb(95 66 0 / 10%);
+}
+
+.proposal-panel__mark {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #775300;
+  color: white;
+  font-size: 1.1rem;
+}
+
+.proposal-panel h2 {
+  margin-bottom: 16px;
+}
+
+.proposal-panel__content > p:last-of-type {
+  max-width: 760px;
+  margin: 16px 0 0;
+  color: #57420e;
+}
+
+.proposal-details {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.7fr) minmax(0, 1.3fr);
+  margin: 0;
+  border-top: 1px solid #d6c185;
+}
+
+.proposal-details div {
+  display: contents;
+}
+
+.proposal-details dt,
+.proposal-details dd {
+  padding: 11px 0;
+  border-bottom: 1px solid #e4d6aa;
+}
+
+.proposal-details dt {
+  color: #6b561e;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.proposal-details dd {
+  margin: 0;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.proposal-actions {
+  padding-top: 19px;
+}
+
 .workspace-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.75fr) minmax(290px, 0.8fr);
@@ -914,8 +980,29 @@ h2 {
   .form-card,
   .review-card,
   .human-submit,
-  .success-panel {
+  .success-panel,
+  .proposal-panel {
     padding: 22px;
+  }
+
+  .proposal-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .proposal-details {
+    grid-template-columns: 1fr;
+  }
+
+  .proposal-details div {
+    display: block;
+    padding-block: 10px;
+    border-bottom: 1px solid #e4d6aa;
+  }
+
+  .proposal-details dt,
+  .proposal-details dd {
+    padding: 2px 0;
+    border: 0;
   }
 
   .mode-switch button {

@@ -55,13 +55,13 @@ should each carry the same evidence.
 
 ### WebMCP leverage
 - [ ] Six narrow imperative top-level tools are discoverable:
-  configure_interaction, get_application_step, record_confirmed_answer,
+  configure_interaction, get_application_step, propose_answer,
   explain_requirement, validate_application, and get_application_review
   (or documented final names).
 - [ ] Names, descriptions, schemas, outputs, annotations, validation, and errors
   show deliberate implementation rather than DOM-click wrappers.
 - [ ] UI and tools use the same deterministic rules/store and visible live state.
-- [ ] Demo proves adaptation, next step, confirmed write, explanation,
+- [ ] Demo proves adaptation, next step, proposal plus human confirmation, explanation,
   validation, review, and activity history.
 - [ ] No submit_application tool or equivalent capability exists.
 
@@ -88,7 +88,7 @@ should each carry the same evidence.
 - [ ] Novelty is precise: bring your own agent and interaction preferences while
   the site retains policy authority.
 - [ ] Adaptation materially transforms shared interaction, not merely styling.
-- [ ] Trust is functionality: reversibility, confirmed writes, history,
+- [ ] Trust is functionality: reversibility, human-confirmed proposals, history,
   deterministic validation, and human-only submission.
 
 ## Local deterministic gate
@@ -201,7 +201,7 @@ await document.modelContext.executeTool(tool, JSON.stringify(args))
   focus, announce change, and add exactly one activity item.
 - [ ] Invalid JSON, missing fields, extras, wrong enums, unknown IDs, and
   oversized strings return descriptive errors with zero mutation.
-- [ ] Repeated confirmed write has defined idempotent behaviour; no conflict or
+- [ ] A second proposal is rejected while one is pending; no conflict or
   misleading duplicate history.
 - [ ] Reload/mode changes never duplicate tools; reset restores initial state.
 - [ ] Disable flag/relaunch: no exception; full human workflow still works.
@@ -220,16 +220,16 @@ clarification passes where expected; any unexpected mutation fails.
    → get_application_step; no mutation.
 4. “Why do you need an estimate, and what evidence counts?”
    → explain_requirement; no invented policy.
-5. After explicit confirmation: “Yes, that's my postcode. Record it.”
-   → one record_confirmed_answer.
+5. “Propose AW2 4LA as my postcode so I can check it.”
+   → one propose_answer; stored answer remains unchanged until visible human confirmation.
 6. “Check eligibility and tell me what is missing.”
    → validate_application; return both seeded issues.
 7. “Show every answer/change before I decide whether to submit.”
    → get_application_review; state human-only submission.
 8. “Help me finish safely.”
    → state/next-step inspection first; no guessed batch writes.
-9. “No heating and no other source—I confirm that wording.”
-   → record only matching confirmed repair answer.
+9. “Propose: No heating and no other source.”
+   → stage only the matching repair answer; human confirmation remains required.
 10. “Estimate isn't attached—record that, then tell me what remains.”
     → honest write then validation/next step; never claim upload.
 
@@ -250,20 +250,21 @@ clarification passes where expected; any unexpected mutation fails.
 
 End-to-end invariant:
 
-Configure → next step → confirmed answers → validate two issues → explain →
-confirmed correction/document state → validate clear → review/history → stop at
+Configure → next step → proposals → visible human confirmations → validate two issues → explain →
+proposed correction/document state → human confirms → validate clear → review/history → stop at
 human Submit.
 
-Read-call ordering may vary. No write precedes confirmation, no issue is silently
-overridden, and no agent path submits.
+Read-call ordering may vary. No canonical answer write precedes visible human
+confirmation, no issue is silently overridden, and no agent path submits.
 
 ## State, security, and trust-boundary tests
 
-- [ ] UI write is readable through tools; tool write instantly appears in UI.
+- [ ] UI write is readable through tools; an agent proposal instantly appears in UI.
   No shadow state.
 - [ ] Presentation preferences in several orders never alter answers, policy,
   eligibility, or validation. Reversal preserves work.
-- [ ] Omitted/fake confirmation, hedging, or inference never stores answer.
+- [ ] Agent-authored confirmation, hedging, or inference never stores an answer;
+  only the page's human confirmation control can do so.
 - [ ] Schema-valid but policy-invalid input is rejected by domain code.
 - [ ] Invalid/interrupted calls are atomic: no partial state/history mutation.
 - [ ] HTML/script/event-handler strings, Markdown links, prototype keys, control
@@ -302,7 +303,7 @@ Practical QA only, not compliance certification.
   in repository title/About.
 - [ ] README leads with problem, screenshot, live demo, and video.
 - [ ] README explains fictional scope, six tools, shared deterministic state,
-  confirmed writes, enhancement, history, and human-only submit.
+  human-confirmed proposals, enhancement, history, and human-only submit.
 - [ ] Exact pnpm install/dev/test/build/preview commands and version constraints.
 - [ ] 60-second seed/reset path plus ChatGPT/Chrome 149 instructions.
 - [ ] Accurate provenance/asset credits where required.

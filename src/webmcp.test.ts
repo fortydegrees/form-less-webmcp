@@ -17,7 +17,7 @@ describe('WebMCP tool contract', () => {
     expect(webMcpTools.map((candidate) => candidate.name)).toEqual([
       'configure_interaction',
       'get_application_step',
-      'record_confirmed_answer',
+      'propose_answer',
       'explain_requirement',
       'validate_application',
       'get_application_review',
@@ -34,18 +34,23 @@ describe('WebMCP tool contract', () => {
       readOnlyHint: true,
       untrustedContentHint: true,
     })
-    expect(tool('record_confirmed_answer').annotations?.readOnlyHint).toBe(false)
+    expect(tool('propose_answer').annotations?.readOnlyHint).toBe(false)
   })
 
   it('uses the same domain store for tool writes and UI reads', async () => {
-    await tool('record_confirmed_answer').execute({
+    const result = await tool('propose_answer').execute({
       questionId: 'repair_description',
       value: 'The boiler stopped working two days ago. There is no heating or hot water.',
-      confirmed: true,
     })
 
-    expect(applicationStore.getSnapshot().answers.repair_description).toContain('two days ago')
+    expect(result).toMatchObject({ proposed: true, stored: false })
+    expect(applicationStore.getSnapshot().answers.repair_description).toBe('boiler problem')
+    expect(applicationStore.getSnapshot().pendingProposal?.value).toContain('two days ago')
     expect(applicationStore.getSnapshot().history).toHaveLength(1)
+
+    applicationStore.confirmAgentProposal()
+    expect(applicationStore.getSnapshot().answers.repair_description).toContain('two days ago')
+    expect(applicationStore.getSnapshot().history.map((entry) => entry.actor)).toEqual(['agent', 'human'])
   })
 
   it('returns a bounded review payload that explicitly withholds submission', async () => {
@@ -61,14 +66,17 @@ describe('WebMCP tool contract', () => {
     const success = await tool('validate_application').execute({})
     expect(success).toMatchObject({ valid: false, issueCount: 2 })
 
-    const failure = await tool('record_confirmed_answer').execute({
+    await tool('propose_answer').execute({
+      questionId: 'evidence_status',
+      value: 'estimate_ready',
+    })
+    const failure = await tool('propose_answer').execute({
       questionId: 'repair_description',
       value: 'Still vague',
-      confirmed: false,
     })
     expect(failure).toMatchObject({
       ok: false,
-      error: { code: 'confirmation_required' },
+      error: { code: 'proposal_pending' },
     })
   })
 

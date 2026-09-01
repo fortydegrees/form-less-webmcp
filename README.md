@@ -9,9 +9,10 @@ visible shared state, and a deliberately human-only final submission.
 
 The seeded demo starts with a vague repair description and missing evidence.
 An agent can switch the same application into one-question guided mode, explain
-site-authored requirements, record only answers the applicant has confirmed,
-and run validation. Every agent write appears in the activity history. The
-applicant reviews the result and presses Submit themselves.
+site-authored requirements, propose answers for the applicant to confirm visibly,
+and run validation. A proposal never changes the application by itself, and
+every decision appears in the activity history. The applicant reviews the result
+and presses Submit themselves.
 
 The Alderwick service and all its rules are fictional. It is a technology demo,
 not a real application or source of eligibility advice.
@@ -20,7 +21,7 @@ not a real application or source of eligibility advice.
 
 - `configure_interaction` changes presentation preferences, never policy or answers.
 - `get_application_step` returns the next incomplete or invalid official question.
-- `record_confirmed_answer` records one explicitly confirmed, schema-valid answer.
+- `propose_answer` stages one schema-valid answer for visible human confirmation.
 - `explain_requirement` returns the site-authored rule and accepted evidence.
 - `validate_application` runs the service's deterministic checks.
 - `get_application_review` returns answers, issues, and visible agent changes.

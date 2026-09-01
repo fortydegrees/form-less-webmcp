@@ -191,10 +191,16 @@ export interface ActivityEntry {
   detail: string
 }
 
+export interface PendingAnswerProposal {
+  questionId: QuestionId
+  value: AnswerValue
+}
+
 export interface ApplicationState {
   mode: PresentationMode
   preferences: InteractionPreferences
   answers: Partial<Record<QuestionId, AnswerValue>>
+  pendingProposal: PendingAnswerProposal | null
   screen: ApplicationScreen
   history: readonly ActivityEntry[]
   nextActivityId: number
@@ -272,6 +278,7 @@ export function createInitialState(): ApplicationState {
       plainLanguage: false,
     },
     answers: { ...seededAnswers },
+    pendingProposal: null,
     screen: 'application',
     history: [],
     nextActivityId: 1,
@@ -380,19 +387,19 @@ export function setHumanAnswer(
   }
 }
 
-export function recordConfirmedAnswer(
+export function proposeAnswer(
   state: ApplicationState,
-  input: { questionId: string; value: unknown; confirmed: unknown },
+  input: { questionId: string; value: unknown },
   actor: 'agent',
 ): ApplicationState {
-  if (input.confirmed !== true) {
+  if (state.pendingProposal) {
     throw new DomainError(
-      'confirmation_required',
-      'The agent may only record an answer you have explicitly confirmed.',
+      'proposal_pending',
+      'The applicant must confirm or reject the current proposal before the agent proposes another answer.',
     )
   }
   if (!isQuestionId(input.questionId)) {
-    throw new DomainError('unknown_question', 'The agent could not save that answer. The question is not recognised.')
+    throw new DomainError('unknown_question', 'The agent could not propose that answer. The question is not recognised.')
   }
   if (typeof input.value !== 'string' && typeof input.value !== 'number') {
     throw new DomainError('invalid_value', 'The answer must be text or a number.')
@@ -402,20 +409,63 @@ export function recordConfirmedAnswer(
 
   const question = getQuestion(input.questionId)
   const answerLabel = formatAnswer(input.questionId, answer)
-  const previous = state.answers[input.questionId]
-  const detail = previous === undefined
-    ? `Agent recorded “${answerLabel}” for “${question.shortLabel}” after your confirmation.`
-    : `Agent changed “${question.shortLabel}” from “${formatAnswer(input.questionId, previous)}” to “${answerLabel}” after your confirmation.`
   return appendActivity(
     {
       ...state,
-      answers: { ...state.answers, [input.questionId]: answer },
+      pendingProposal: { questionId: input.questionId, value: answer },
       screen: 'application',
     },
     actor,
-    'Agent recorded a confirmed answer',
+    'Agent proposed an answer',
+    `Agent proposed “${answerLabel}” for “${question.shortLabel}”. Review it before it changes your application.`,
+    `Agent proposed ${question.shortLabel}: ${answerLabel}. Confirm or reject it before continuing.`,
+  )
+}
+
+export function confirmPendingProposal(state: ApplicationState): ApplicationState {
+  const proposal = state.pendingProposal
+  if (!proposal) {
+    throw new DomainError('no_pending_proposal', 'There is no agent proposal to confirm.')
+  }
+
+  // Validate again at the human decision boundary rather than trusting the
+  // earlier agent call or storing an unvalidated pending value.
+  assertAnswer(proposal.questionId, proposal.value)
+  const question = getQuestion(proposal.questionId)
+  const answerLabel = formatAnswer(proposal.questionId, proposal.value)
+  const previous = state.answers[proposal.questionId]
+  const detail = previous === undefined
+    ? `You confirmed the agent’s proposal for “${question.shortLabel}”: “${answerLabel}”.`
+    : `You confirmed the agent’s proposal to change “${question.shortLabel}” from “${formatAnswer(proposal.questionId, previous)}” to “${answerLabel}”.`
+
+  return appendActivity(
+    {
+      ...state,
+      answers: { ...state.answers, [proposal.questionId]: proposal.value },
+      pendingProposal: null,
+      screen: 'application',
+    },
+    'human',
+    'You confirmed an agent proposal',
     detail,
-    `Agent saved ${question.shortLabel}: ${answerLabel}.`,
+    `You confirmed the proposed answer for ${question.shortLabel}. The application answer is now ${answerLabel}.`,
+  )
+}
+
+export function rejectPendingProposal(state: ApplicationState): ApplicationState {
+  const proposal = state.pendingProposal
+  if (!proposal) {
+    throw new DomainError('no_pending_proposal', 'There is no agent proposal to reject.')
+  }
+  const question = getQuestion(proposal.questionId)
+  const answerLabel = formatAnswer(proposal.questionId, proposal.value)
+
+  return appendActivity(
+    { ...state, pendingProposal: null, screen: 'application' },
+    'human',
+    'You rejected an agent proposal',
+    `You rejected the agent’s proposed answer “${answerLabel}” for “${question.shortLabel}”. The application answer did not change.`,
+    `You rejected the proposed answer for ${question.shortLabel}. The application answer did not change.`,
   )
 }
 
@@ -552,7 +602,7 @@ export function explainRequirement(requirementId: string) {
 export function getApplicationReview(state: ApplicationState): ApplicationReview {
   const issues = validateApplication(state)
   return {
-    ready: issues.length === 0,
+    ready: issues.length === 0 && state.pendingProposal === null,
     answers: questions.map((question) => ({
       questionId: question.id,
       label: question.shortLabel,
@@ -568,6 +618,13 @@ export function getApplicationReview(state: ApplicationState): ApplicationReview
 }
 
 export function openReview(state: ApplicationState): ApplicationState {
+  if (state.pendingProposal) {
+    return {
+      ...state,
+      screen: 'application',
+      announcement: 'Confirm or reject the agent’s proposed answer before you continue to review.',
+    }
+  }
   const issues = validateApplication(state)
   if (issues.length > 0) {
     return {
@@ -608,4 +665,3 @@ export function getQuestion(questionId: QuestionId): QuestionDefinition {
 export function isQuestionId(value: string): value is QuestionId {
   return questionIds.includes(value as QuestionId)
 }
-

@@ -123,10 +123,10 @@ export const webMcpTools: readonly WebMcpTool[] = [
     },
   },
   {
-    name: 'record_confirmed_answer',
-    title: 'Record one confirmed answer',
+    name: 'propose_answer',
+    title: 'Propose one application answer',
     description:
-      'Records exactly one answer that the applicant has explicitly confirmed. Rejects unknown questions, invalid values, and answers without confirmation.',
+      'Creates one visible answer proposal for the applicant to confirm or reject in the page. It never changes a stored answer; only the applicant can confirm a proposal in the human interface.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -144,30 +144,26 @@ export const webMcpTools: readonly WebMcpTool[] = [
           ],
         },
         value: {
-          description: 'The exact answer confirmed by the applicant; estimated_cost is a whole number.',
+          description: 'The exact answer to show the applicant; estimated_cost is a whole number.',
           oneOf: [{ type: 'string' }, { type: 'number' }],
         },
-        confirmed: {
-          type: 'boolean',
-          const: true,
-          description: 'Must be true only after the applicant explicitly confirms this answer.',
-        },
       },
-      required: ['questionId', 'value', 'confirmed'],
+      required: ['questionId', 'value'],
       additionalProperties: false,
     },
     annotations: { readOnlyHint: false, untrustedContentHint: true },
     async execute(input) {
       return safely(() => {
-        const state = applicationStore.recordAgentAnswer({
+        const state = applicationStore.proposeAgentAnswer({
           questionId: String(input.questionId ?? ''),
           value: input.value,
-          confirmed: input.confirmed,
         })
         return {
-          recorded: true,
+          proposed: true,
+          stored: false,
           questionId: input.questionId,
-          nextStep: getApplicationStep(state),
+          proposedValue: state.pendingProposal?.value,
+          instruction: 'The applicant must use Confirm proposed answer or Reject in the visible page.',
         }
       })
     },

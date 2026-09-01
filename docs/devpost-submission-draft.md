@@ -157,7 +157,7 @@ The top-level page imperatively registers six tools through
 
 - `configure_interaction`
 - `get_application_step`
-- `record_confirmed_answer` `[UPDATE NAME/BEHAVIOUR AFTER HUMAN-CONFIRMATION CHANGE]`
+- `propose_answer`
 - `explain_requirement`
 - `validate_application`
 - `get_application_review`
@@ -166,6 +166,11 @@ Each tool has a narrow JSON Schema, an explicit description, annotations,
 runtime validation and a concise structured result. Registration is
 feature-detected and cleaned up with an `AbortController` when the React root
 unmounts.
+
+`propose_answer` cannot write an application answer. It creates one visible
+pending proposal, and the applicant must use the page's **Confirm proposed
+answer** or **Reject** control. Confirmation validates again at the human
+decision boundary; neither control is exposed through WebMCP.
 
 The human interface and WebMCP handlers use the same TypeScript domain model and
 external store. There is no shadow agent state, backend, model API, account or
@@ -193,4 +198,3 @@ Do not finalise these until evidence exists:
 - exact ChatGPT app/client/model/version used for WebMCP QA
 - public YouTube URL, duration and audio check
 - image gallery selection and captions
-- final tool name after the visible human-confirmation change

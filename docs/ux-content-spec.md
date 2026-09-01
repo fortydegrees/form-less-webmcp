@@ -89,7 +89,7 @@ Unsupported-browser note:
 Supported, no-agent-yet note:
 
 > This browser supports agent collaboration. You can ask a compatible agent to
-> explain a rule, change the presentation or record an answer you have confirmed.
+> explain a rule, change the presentation or propose an answer for you to confirm.
 
 ## 4. Fictional scheme rules
 
@@ -361,19 +361,22 @@ Explanation disclosure headings:
 - **What this means**
 - **What evidence is accepted**
 
-Agent-recorded answer behaviour:
+Agent-proposed answer behaviour:
 
-- Show the saved answer immediately in the ordinary form control and activity
-  history.
-- Announce: **Agent saved {review label}: {display value}.**
-- In guided mode, reveal the next incomplete question. Do not steal focus from
-  an existing focused control. If the focused element is removed by the mode
-  change, move focus to the new question heading.
-- Never use “the agent chose” or infer confirmation. The activity wording states
-  that the answer was recorded after user confirmation because the tool contract
-  requires that confirmation.
+- `propose_answer` validates and stages exactly one proposed question/value. It
+  does not change the canonical answer or advance guided mode.
+- Show the question, proposed value and current application value in a persistent
+  pending-proposal region with native **Confirm proposed answer** and **Reject**
+  buttons. A second proposal is rejected until the first is resolved.
+- Announce: **Agent proposed {review label}: {display value}. Confirm or reject it before continuing.**
+- Do not steal focus when a proposal arrives. After either human decision, move
+  focus to the related overview control or the current guided-question heading.
+- Confirmation validates again, stores the answer, clears the proposal and logs
+  separate agent-proposal and human-confirmation entries. Rejection clears the
+  proposal without changing the answer and logs the human decision.
+- Review cannot open while a proposal is pending. Reset clears it.
 - Invalid or unknown tool input changes no state and returns the matching field
-  error. Announce: **The agent could not save that answer. {error text}**
+  error. Announce: **The agent could not propose that answer. {error text}**
 
 ## 10. Agent activity language
 
@@ -393,8 +396,9 @@ Templates:
 - Preference: **Agent turned on plain-language explanations.**
 - Preference: **Agent reduced non-essential motion.**
 - Preference reversal: **You changed the form back to show all questions.**
-- Answer: **Agent recorded “{display value}” for “{question label}” after your confirmation.**
-- Answer changed: **Agent changed “{question label}” from “{old display value}” to “{new display value}” after your confirmation.**
+- Proposal: **Agent proposed “{display value}” for “{question label}”. Review it before it changes your application.**
+- Confirmation: **You confirmed the agent’s proposal for “{question label}”: “{display value}”.**
+- Rejection: **You rejected the agent’s proposed answer “{display value}” for “{question label}”. The application answer did not change.**
 - Explanation: **Agent explained “{requirement short label}” using the service’s demo rule.**
 - Validation with issues: **Agent checked the application. {count} {thing/things} need attention.**
 - Validation clear: **Agent checked the application. No issues were found.**
@@ -422,8 +426,8 @@ from an edit restores focus to that answer row on review.
 
 Agent summary:
 
-> Your agent recorded {count} {answer/answers} after your confirmation and ran
-> the application check. View agent activity.
+> Your agent proposed {count} {answer/answers}. You confirmed each stored change
+> in the page. View agent activity.
 
 If no agent changed an answer:
 
@@ -545,7 +549,8 @@ This is a functional QA checklist, not a certification claim.
 - The first seeded validation returns exactly two issues: vague description and
   missing evidence. The corrected state returns none.
 - Switching modes does not change validation output or stored answers.
-- Every successful agent write produces one visible activity entry. Human-only
+- Every successful agent proposal produces exactly one visible activity entry;
+  the human confirmation or rejection produces its own truthful entry. Human-only
   submission produces no agent activity entry.
 - All WebMCP user-facing text is drawn from this specification or the same
   central content constants as the visible interface.
@@ -570,7 +575,7 @@ entirely fictional and have not been checked against any real council scheme.
 Assumptions:
 
 - Eight questions remain short enough for the under-two-minute seeded demo when
-  an agent records confirmed answers.
+  an agent proposes the two corrected answers for visible human confirmation.
 - Evidence is a declared readiness state because uploads, document inspection
   and storage are out of scope.
 - No contact details are collected because the prototype sends nothing and the

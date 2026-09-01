@@ -15,8 +15,8 @@ The entry is a fictional UK-style urgent home-repair grant application for a
 low-income homeowner dealing with a safety-critical repair. The underlying
 service remains a coherent, keyboard-operable form. WebMCP adds structured,
 site-authored collaboration: the user's agent can configure the interaction,
-ask for the next official step, record only confirmed answers, explain a rule,
-and run deterministic validation.
+ask for the next official step, propose an answer for visible human confirmation,
+explain a rule, and run deterministic validation.
 
 ## Judge Story
 
@@ -59,8 +59,8 @@ Names may change after testing, but responsibilities should remain narrow:
    record keyboard/reduced-motion/plain-language preferences, and visibly apply them.
 2. `get_application_step` — return the next incomplete official question plus
    allowed answer shape and relevant requirement identifiers.
-3. `record_confirmed_answer` — save one user-confirmed answer and return the
-   next step; reject unknown questions or invalid values.
+3. `propose_answer` — stage one schema-valid answer without changing the
+   application; the applicant must visibly confirm or reject it in the page.
 4. `explain_requirement` — return the official requirement, a plain-language
    explanation, and what evidence is accepted.
 5. `validate_application` — run deterministic eligibility/completeness checks

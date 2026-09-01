@@ -3,6 +3,8 @@ import { applicationStore } from './applicationStore'
 import {
   getApplicationReview,
   getApplicationStep,
+  formatAnswer,
+  getQuestion,
   questions,
   requirements,
   validateApplication,
@@ -108,6 +110,8 @@ function App() {
               <strong>If anyone is in immediate danger, leave the property and contact the emergency services.</strong>
               <span>This demo cannot arrange emergency help.</span>
             </div>
+
+            {state.pendingProposal && <PendingProposalPanel />}
 
             <div className="workspace-layout">
               <section className="application-column" aria-label="Grant application">
@@ -247,6 +251,73 @@ function InteractionControls() {
             <span>{label}</span>
           </label>
         ))}
+      </div>
+    </section>
+  )
+}
+
+function PendingProposalPanel() {
+  const proposal = applicationStore.getSnapshot().pendingProposal
+  if (!proposal) return null
+
+  const question = getQuestion(proposal.questionId)
+  const proposedValue = formatAnswer(proposal.questionId, proposal.value)
+  const currentValue = applicationStore.getSnapshot().answers[proposal.questionId]
+
+  const finish = (decision: 'confirm' | 'reject') => {
+    const questionId = proposal.questionId
+    if (decision === 'confirm') {
+      applicationStore.confirmAgentProposal()
+    } else {
+      applicationStore.rejectAgentProposal()
+    }
+    window.requestAnimationFrame(() => {
+      const state = applicationStore.getSnapshot()
+      if (state.mode === 'guided') {
+        document.getElementById('guided-question-heading')?.focus()
+      } else {
+        document.getElementById(questionId)?.focus()
+      }
+    })
+  }
+
+  return (
+    <section
+      id="pending-proposal"
+      className="proposal-panel"
+      aria-labelledby="proposal-title"
+      aria-describedby="proposal-instruction"
+      tabIndex={-1}
+    >
+      <div className="proposal-panel__mark" aria-hidden="true">✦</div>
+      <div className="proposal-panel__content">
+        <p className="eyebrow">Your decision is required</p>
+        <h2 id="proposal-title">Your agent proposed an answer</h2>
+        <dl className="proposal-details">
+          <div>
+            <dt>Question</dt>
+            <dd>{question.label}</dd>
+          </div>
+          <div>
+            <dt>Proposed answer</dt>
+            <dd>{proposedValue}</dd>
+          </div>
+          <div>
+            <dt>Current application answer</dt>
+            <dd>{currentValue === undefined ? 'Not answered' : formatAnswer(proposal.questionId, currentValue)}</dd>
+          </div>
+        </dl>
+        <p id="proposal-instruction">
+          The proposal has not changed your application. Check it, then confirm or reject it yourself.
+        </p>
+        <div className="form-actions proposal-actions">
+          <button className="button button--primary" type="button" onClick={() => finish('confirm')}>
+            Confirm proposed answer
+          </button>
+          <button className="button button--quiet" type="button" onClick={() => finish('reject')}>
+            Reject
+          </button>
+        </div>
       </div>
     </section>
   )
@@ -435,7 +506,22 @@ function QuestionField({
 }
 
 function FormAction() {
-  const issues = validateApplication(applicationStore.getSnapshot())
+  const state = applicationStore.getSnapshot()
+  const issues = validateApplication(state)
+  if (issues.length === 0 && state.pendingProposal) {
+    return (
+      <div className="form-actions">
+        <button
+          className="button button--primary"
+          type="button"
+          onClick={() => document.getElementById('pending-proposal')?.focus()}
+        >
+          Review proposed answer
+        </button>
+        <span>Confirm or reject the proposal before review</span>
+      </div>
+    )
+  }
   return (
     <div className="form-actions">
       <button className="button button--primary" type="button" onClick={runChecks}>
