@@ -36,19 +36,19 @@ declare global {
   }
 }
 
-function success(data: unknown): string {
-  return JSON.stringify(data)
+function success(data: unknown): unknown {
+  return data
 }
 
-async function safely(run: () => unknown): Promise<string> {
+async function safely(run: () => unknown): Promise<unknown> {
   try {
     return success(run())
   } catch (error) {
     if (error instanceof DomainError) {
-      return JSON.stringify({
+      return {
         ok: false,
         error: { code: error.code, message: error.message },
-      })
+      }
     }
     throw error
   }

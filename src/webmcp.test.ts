@@ -50,7 +50,7 @@ describe('WebMCP tool contract', () => {
 
   it('returns a bounded review payload that explicitly withholds submission', async () => {
     const result = await tool('get_application_review').execute({})
-    const text = String(result)
+    const text = JSON.stringify(result)
 
     expect(text.length).toBeLessThan(1500)
     expect(text).toContain('availableToAgent')
@@ -59,14 +59,14 @@ describe('WebMCP tool contract', () => {
 
   it('returns one directly consumable JSON value for success and domain errors', async () => {
     const success = await tool('validate_application').execute({})
-    expect(JSON.parse(String(success))).toMatchObject({ valid: false, issueCount: 2 })
+    expect(success).toMatchObject({ valid: false, issueCount: 2 })
 
     const failure = await tool('record_confirmed_answer').execute({
       questionId: 'repair_description',
       value: 'Still vague',
       confirmed: false,
     })
-    expect(JSON.parse(String(failure))).toMatchObject({
+    expect(failure).toMatchObject({
       ok: false,
       error: { code: 'confirmation_required' },
     })
