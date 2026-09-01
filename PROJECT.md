@@ -131,3 +131,31 @@ The description and video must answer:
 Judge criteria are equally weighted: WebMCP leverage, execution, potential
 impact, and creativity/ambition. Optimise the product and evidence for all four.
 
+## Judging Position
+
+Stage One should be a clear pass: the product fits the human-agent open-web
+theme and its six tools are a substantive WebMCP implementation rather than DOM
+automation. The Stage Two thesis is **a site-controlled collaboration protocol
+that adapts presentation while preserving policy authority, auditability, and
+human consent**—not merely an agent filling in a council form.
+
+Current risk is uneven evidence, not the concept. WebMCP leverage and execution
+are strongest; the public demo and submission must make impact and ambition
+equally concrete. The highest-value product refinement is to replace the
+agent-supplied `confirmed: true` assertion with a visible pending proposal that
+the applicant must confirm in the human interface before the answer is stored.
+
+## Impact Evidence
+
+Use these facts narrowly; neither source measures form abandonment or proves
+that WebMCP alone solves digital exclusion.
+
+- The UK government's 2025 Digital Inclusion Action Plan reports that around
+  23% of the UK population may struggle to interact with online services. The
+  government page cites Lloyds data, so it is an official secondary source:
+  https://www.gov.uk/government/publications/digital-inclusion-action-plan-first-steps/digital-inclusion-action-plan-first-steps
+- GDS's 2022–24 monitoring found accessibility issues on nearly all 1,203
+  public-sector websites and 21 apps tested, with recurring barriers including
+  keyboard operation, visible focus, reflow, and contrast. This is a monitored
+  sample, not a population prevalence estimate:
+  https://www.gov.uk/government/publications/accessibility-monitoring-of-public-sector-websites-and-mobile-apps-from-2022-to-2024/accessibility-monitoring-of-public-sector-websites-and-mobile-apps-from-2022-to-2024
