@@ -1,4 +1,5 @@
 import { createRoot } from 'react-dom/client'
+import '@fontsource-variable/public-sans'
 import './index.css'
 import App from './App.tsx'
 

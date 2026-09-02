@@ -19,7 +19,7 @@ import './App.css'
 type WebMcpStatus = 'checking' | 'supported' | 'unsupported' | 'error'
 
 const canonicalPrompt =
-  'Use this site’s tools—not browser clicks. I use keyboard navigation. I own and live at AW2 4LA, receive Universal Credit, and my boiler failed two days ago. There is no heating or hot water. I have a £2,450 written estimate but no photos. Build me a focused pathway and propose only answers supported by what I said. Do not submit.'
+  'Use this site’s tools, not browser clicks. I use keyboard navigation. I own and live at AW2 4LA, receive Universal Credit, and my boiler failed two days ago. There is no heating or hot water. I have a £2,450 written estimate but no photos. Show me only the questions that apply, explain why they matter, and suggest answers only where I have given you the facts. Do not submit.'
 
 function useWebMcpRegistration(): WebMcpStatus {
   const [status, setStatus] = useState<WebMcpStatus>(() =>
@@ -102,14 +102,14 @@ function focusAndReveal(id: string, reducedMotion: boolean) {
 }
 
 function PrototypeBanner() {
-  return <div className="prototype-banner"><div className="page-width"><strong>Fictional prototype</strong><span>Alderwick is not a real council. No information is sent anywhere.</span></div></div>
+  return <div className="prototype-banner"><div className="page-width"><strong>Demonstration service</strong><span>Alderwick is fictional. Nothing you enter leaves this page.</span></div></div>
 }
 
 function SiteHeader() {
   return (
     <header className="site-header">
       <div className="page-width site-header__inner">
-        <a className="brand" href="#main-content"><span className="brand__mark" aria-hidden="true">A</span><span><strong>Alderwick</strong><small>Home Support</small></span></a>
+        <a className="brand" href="#main-content"><span className="brand__mark" aria-hidden="true">A</span><span><strong>Alderwick Council</strong><small>Housing support</small></span></a>
         <span className="case-reference">Application <strong>AW–0247</strong></span>
         <button className="text-button" type="button" onClick={() => applicationStore.reset()}>Reset demo</button>
       </div>
@@ -119,24 +119,24 @@ function SiteHeader() {
 
 function Hero({ status }: { status: WebMcpStatus }) {
   const messages = {
-    checking: 'Checking for site tools…',
-    supported: 'WebMCP ready · 6 tools · 0 submission tools',
-    unsupported: 'Standard form ready · WebMCP unavailable in this browser',
-    error: 'Standard form ready · Site tools could not start',
+    checking: 'Checking whether your agent can help…',
+    supported: 'Your browser agent can work with this form',
+    unsupported: 'You can complete this form without an agent',
+    error: 'Agent support could not start',
   }
   return (
     <section className="hero" aria-labelledby="page-title">
       <div>
-        <p className="eyebrow">Urgent home-repair grant</p>
-        <h1 id="page-title">The website knows the rules.<br /><em>Your agent knows you.</em></h1>
-        <p className="lede">Together they can produce the right interface—without letting the agent rewrite policy, confirm your answers, or submit for you.</p>
+        <p className="eyebrow">Urgent home repair grant</p>
+        <h1 id="page-title">Get help with an urgent repair to your home</h1>
+        <p className="lede">Apply for help with essential heating, electrical or structural work. Complete the full form yourself, or ask your browser agent to find the shorter route that fits your circumstances.</p>
       </div>
       <div className={`connection-card connection-card--${status}`}>
         <span className="agent-orb" aria-hidden="true">✦</span>
-        <div><strong>{messages[status]}</strong><span>{status === 'supported' ? 'Typed site tools are available to your browser agent.' : 'You can still complete every question yourself.'}</span></div>
+        <div><strong>{messages[status]}</strong><span>{status === 'supported' ? '6 structured site tools available · no submission tool' : 'Every question and check remains available on this page.'}</span></div>
       </div>
       <div className="demo-prompt">
-        <span>Canonical agent request</span>
+        <span>Try asking your agent</span>
         <blockquote>“{canonicalPrompt}”</blockquote>
       </div>
     </section>
@@ -146,15 +146,15 @@ function Hero({ status }: { status: WebMcpStatus }) {
 function AuthorityStrip() {
   return (
     <section className="authority-strip" aria-label="Application authority">
-      <div className="authority authority--agent"><span>✦</span><div><small>Your agent</small><strong>Reads structure, adapts, explains, proposes</strong></div></div>
-      <div className="authority authority--human"><span>●</span><div><small>You</small><strong>Confirm answers and submit</strong></div></div>
-      <div className="authority authority--service"><span>✓</span><div><small>Service rules</small><strong>Determine pathways and validation</strong></div></div>
+      <div className="authority authority--agent"><span aria-hidden="true">A</span><div><small>Your agent can</small><strong>Read the form, narrow your route and suggest answers</strong></div></div>
+      <div className="authority authority--human"><span aria-hidden="true">Y</span><div><small>Only you can</small><strong>Accept an answer, make the declaration and submit</strong></div></div>
+      <div className="authority authority--service"><span aria-hidden="true">R</span><div><small>Council rules</small><strong>Decide what applies and check the application</strong></div></div>
     </section>
   )
 }
 
 function KeyboardNote() {
-  return <div className="keyboard-note" role="note"><strong>Keyboard guidance is on.</strong> Use Tab to move between controls and arrow keys inside answer groups.</div>
+  return <div className="keyboard-note" role="note"><strong>Keyboard route active.</strong> Use Tab to move between controls and arrow keys within answer choices.</div>
 }
 
 function StandardExperience() {
@@ -165,17 +165,17 @@ function StandardExperience() {
   return (
     <div className="standard-shell">
       <div className="standard-intro">
-        <div><p className="eyebrow">Standard service</p><h2>Complete the full application</h2><p>This conventional form is generated from the same machine-readable contract the agent sees: 24 questions, 5 sections, conditional branches, and official evidence rules.</p></div>
+        <div><p className="eyebrow">Full application</p><h2>Apply for repair support</h2><p>Work through five sections about your home, household, repair and evidence. Follow-up questions appear when they apply to an answer you give.</p></div>
         <div className="completion"><strong>{answered}/{applicable.length}</strong><span>relevant answers complete</span></div>
       </div>
       <div className="standard-grid">
         <aside className="section-nav" aria-label="Application sections">
-          <p>Application sections</p>
+          <p>In this application</p>
           <ol>{sections.map((section, index) => <li key={section.id}><a href={`#section-${section.id}`}><span>{String(index + 1).padStart(2, '0')}</span>{section.title}</a></li>)}</ol>
           <SchemaProof />
         </aside>
         <form className="standard-form" onSubmit={(event) => { event.preventDefault(); applicationStore.runValidation('human') }} noValidate>
-          <div className="safety-note"><strong>Immediate danger?</strong> Leave the property and contact emergency services. This prototype cannot arrange emergency help.</div>
+          <div className="safety-note"><strong>If anyone is in immediate danger</strong>Leave the property and contact the emergency services. This demonstration service cannot arrange emergency help.</div>
           {state.validationVisible && <IssueSummary issues={issues} />}
           {sections.map((section, sectionIndex) => {
             const sectionQuestions = section.questions.map(getQuestion).filter((question) => isQuestionApplicable(question, state.answers))
@@ -188,7 +188,7 @@ function StandardExperience() {
               </section>
             )
           })}
-          <div className="form-actions"><button className="button button--primary" type="submit">Check application</button><span>Checks come from the schema and service rules.</span></div>
+          <div className="form-actions"><button className="button button--primary" type="submit">Check my answers</button><span>We will show anything you need to fix before review.</span></div>
         </form>
       </div>
     </div>
@@ -203,14 +203,14 @@ function AssistedExperience() {
   return (
     <section className="assisted-shell" aria-labelledby="pathway-title">
       <header className="pathway-header">
-        <div><p className="eyebrow">Agent-negotiated interface</p><h2 id="pathway-title" tabIndex={-1}>Your personal pathway</h2><p>The service has safely recomposed its own form around the facts you confirmed. Policy and answer state are unchanged.</p></div>
+        <div><p className="eyebrow">Built from this application</p><h2 id="pathway-title" tabIndex={-1}>Your route through the form</h2><p>Your agent has removed questions that do not apply and brought the useful guidance beside each decision. The council’s rules have not changed.</p></div>
         <button className="text-button text-button--light" type="button" onClick={() => applicationStore.configure({ active: false }, 'human')}>Return to standard form</button>
       </header>
       <div className="pathway-metrics" aria-label="Personal pathway summary">
-        <div><strong>{pathway.relevantQuestionIds.length}</strong><span>relevant questions</span></div>
-        <div><strong>{pathway.notApplicableQuestionIds.length}</strong><span>not applicable</span></div>
-        <div><strong>{pathway.remainingRelevant}</strong><span>answers remaining</span></div>
-        <div><strong>{pathway.documentsNeeded.length}</strong><span>evidence items needed</span></div>
+        <div><strong>{pathway.relevantQuestionIds.length}</strong><span>questions on your route</span></div>
+        <div><strong>{pathway.notApplicableQuestionIds.length}</strong><span>questions removed</span></div>
+        <div><strong>{pathway.remainingRelevant}</strong><span>answers left</span></div>
+        <div><strong>{pathway.documentsNeeded.length}</strong><span>documents to prepare</span></div>
       </div>
       {state.pendingProposals.length > 0 && <ProposalQueue />}
       <div className="assisted-grid">
@@ -233,7 +233,7 @@ function ProposalQueue() {
   const state = applicationStore.getSnapshot()
   return (
     <section className="proposal-queue" aria-labelledby="proposal-title">
-      <header><span className="agent-orb" aria-hidden="true">✦</span><div><p className="eyebrow">WebMCP proposal handoff</p><h3 id="proposal-title" tabIndex={-1}>Review {state.pendingProposals.length} mapped answers</h3><p>The agent used the schema to map what you said. None of these are stored yet.</p></div><span className="human-only">Human decision</span></header>
+      <header><span className="agent-orb" aria-hidden="true">A</span><div><p className="eyebrow">Answers waiting for you</p><h3 id="proposal-title" tabIndex={-1}>Check {state.pendingProposals.length} suggested answers</h3><p>Your agent matched details you gave against the form. Nothing changes until you accept it.</p></div><span className="human-only">Your decision</span></header>
       <div className="proposal-list">
         {state.pendingProposals.map((proposal) => {
           const question = getQuestion(proposal.questionId)
@@ -241,12 +241,12 @@ function ProposalQueue() {
           return (
             <article className="proposal-item" key={proposal.questionId}>
               <div className="proposal-copy"><small>{question.shortLabel}</small><strong>{formatAnswer(proposal.questionId, proposal.value)}</strong>{proposal.rationale && <p>{proposal.rationale}</p>}<span>Current: {current === undefined ? 'Not answered' : formatAnswer(proposal.questionId, current)}</span></div>
-              <div className="proposal-actions"><button className="button button--human" type="button" onClick={() => applicationStore.confirmAgentProposal(proposal.questionId)}>Confirm</button><button className="text-button" type="button" onClick={() => applicationStore.rejectAgentProposal(proposal.questionId)}>Reject</button></div>
+              <div className="proposal-actions"><button className="button button--human" type="button" onClick={() => applicationStore.confirmAgentProposal(proposal.questionId)}>Use this answer</button><button className="text-button" type="button" onClick={() => applicationStore.rejectAgentProposal(proposal.questionId)}>Not right</button></div>
             </article>
           )
         })}
       </div>
-      {state.pendingProposals.length > 1 && <div className="proposal-bulk"><p>Review the list above before applying every proposal.</p><button className="button button--human" type="button" onClick={() => applicationStore.confirmAllAgentProposals()}>Confirm all reviewed answers</button></div>}
+      {state.pendingProposals.length > 1 && <div className="proposal-bulk"><p>Use this only after checking every suggestion.</p><button className="button button--human" type="button" onClick={() => applicationStore.confirmAllAgentProposals()}>Use all checked answers</button></div>}
     </section>
   )
 }
@@ -258,18 +258,18 @@ function FocusedQuestion({ step }: { step: NonNullable<ReturnType<typeof getAppl
   const issue = state.validationVisible ? step.issue ?? undefined : undefined
   return (
     <section className="focus-card" aria-labelledby="focused-question-title">
-      <div className="focus-card__meta"><span>{step.sectionTitle}</span><span>Relevant question {position} of {pathway.relevantQuestionIds.length}</span></div>
+      <div className="focus-card__meta"><span>{step.sectionTitle}</span><span>Question {position} of {pathway.relevantQuestionIds.length}</span></div>
       <div className="focus-progress" role="progressbar" aria-label={`${pathway.answeredRelevant} of ${pathway.relevantQuestionIds.length} relevant answers complete`} aria-valuemin={0} aria-valuemax={pathway.relevantQuestionIds.length} aria-valuenow={pathway.answeredRelevant}><span style={{ width: `${(pathway.answeredRelevant / pathway.relevantQuestionIds.length) * 100}%` }} /></div>
-      <p className="why-asked"><strong>Why this is on your pathway</strong>{step.whyAsked}</p>
+      <p className="why-asked"><strong>Why you are seeing this</strong>{step.whyAsked}</p>
       <div id="focused-question-title"><QuestionField question={step.question} issue={issue} emphasized /></div>
       {step.question.requirementId && <RequirementCard requirementId={step.question.requirementId} />}
-      <div className="form-actions"><button className="button button--primary" type="button" onClick={() => applicationStore.runValidation('human')}>Save and check pathway</button><span>The next relevant question appears automatically.</span></div>
+      <div className="form-actions"><button className="button button--primary" type="button" onClick={() => applicationStore.runValidation('human')}>Check my route</button><span>We will take you to the next answer that needs attention.</span></div>
     </section>
   )
 }
 
 function PathwayComplete() {
-  return <section className="focus-card focus-card--complete"><span className="complete-mark">✓</span><p className="eyebrow">Pathway complete</p><h3>Every official check passes</h3><p>Review the relevant answers, the agent’s activity, and the human-only submission boundary.</p><button className="button button--primary" type="button" onClick={() => applicationStore.openReview()}>Review application</button></section>
+  return <section className="focus-card focus-card--complete"><span className="complete-mark" aria-hidden="true">✓</span><p className="eyebrow">Route complete</p><h3>Your application passes every check</h3><p>Read through your answers before making the declaration and submitting the demonstration application.</p><button className="button button--primary" type="button" onClick={() => applicationStore.openReview()}>Review my answers</button></section>
 }
 
 function QuestionField({ question, issue, emphasized = false }: { question: QuestionDefinition; issue?: ValidationIssue; emphasized?: boolean }) {
@@ -313,41 +313,41 @@ function QuestionField({ question, issue, emphasized = false }: { question: Ques
 }
 
 function IssueSummary({ issues }: { issues: readonly ValidationIssue[] }) {
-  if (issues.length === 0) return <div className="issue-summary issue-summary--clear" role="status"><strong>Official checks passed.</strong><span>No eligibility or completeness issues remain.</span></div>
-  return <section className="issue-summary" aria-labelledby="issues-title"><h3 id="issues-title">{issues.length} things need attention</h3><ul>{issues.slice(0, 6).map((issue) => <li key={issue.code}><a href={`#${issue.questionId}`}>{issue.message}</a></li>)}</ul>{issues.length > 6 && <p>And {issues.length - 6} more. The focused pathway will take you through them.</p>}</section>
+  if (issues.length === 0) return <div className="issue-summary issue-summary--clear" role="status"><strong>Your answers pass the council’s checks.</strong><span>Nothing else needs attention before review.</span></div>
+  return <section className="issue-summary" aria-labelledby="issues-title"><h3 id="issues-title">Check {issues.length} {issues.length === 1 ? 'answer' : 'answers'}</h3><ul>{issues.slice(0, 6).map((issue) => <li key={issue.code}><a href={`#${issue.questionId}`}>{issue.message}</a></li>)}</ul>{issues.length > 6 && <p>There are {issues.length - 6} more. Your route will take you through each one.</p>}</section>
 }
 
 function RequirementCard({ requirementId }: { requirementId: keyof typeof requirements }) {
   const requirement = requirements[requirementId]
-  return <details className="requirement-card" open={applicationStore.getSnapshot().assistance.plainLanguage}><summary>Official rule: {requirement.title}</summary><div><strong>{requirement.officialRule}</strong><p>{requirement.plainLanguage}</p><small>Evidence: {requirement.evidence}</small></div></details>
+  return <details className="requirement-card" open={applicationStore.getSnapshot().assistance.plainLanguage}><summary>Council rule: {requirement.title}</summary><div><strong>{requirement.officialRule}</strong><p>{requirement.plainLanguage}</p><small>What counts as evidence: {requirement.evidence}</small></div></details>
 }
 
 function PathwayMap() {
   const state = applicationStore.getSnapshot()
   const pathway = getPathway(state)
-  return <section className="rail-card"><p className="eyebrow">Live pathway</p><h3>{pathway.currentSection ?? 'Ready for review'}</h3><ol className="pathway-list">{sections.map((section) => { const ids = section.questions.filter((id) => pathway.relevantQuestionIds.includes(id)); const done = ids.filter((id) => state.answers[id] !== undefined).length; return <li key={section.id} data-complete={ids.length > 0 && done === ids.length || undefined}><span>{done}/{ids.length}</span><div><strong>{section.title}</strong><small>{ids.length === 0 ? 'Not applicable' : 'Relevant to this case'}</small></div></li> })}</ol></section>
+  return <section className="rail-card"><p className="eyebrow">Your route</p><h3>{pathway.currentSection ?? 'Ready to review'}</h3><ol className="pathway-list">{sections.map((section) => { const ids = section.questions.filter((id) => pathway.relevantQuestionIds.includes(id)); const done = ids.filter((id) => state.answers[id] !== undefined).length; return <li key={section.id} data-complete={ids.length > 0 && done === ids.length || undefined}><span>{done}/{ids.length}</span><div><strong>{section.title}</strong><small>{ids.length === 0 ? 'Removed from your route' : 'Applies to you'}</small></div></li> })}</ol></section>
 }
 
 function EvidencePlan() {
   const pathway = getPathway(applicationStore.getSnapshot())
-  return <section className="rail-card"><p className="eyebrow">Evidence plan</p><h3>{pathway.documentsNeeded.length === 0 ? 'Evidence ready' : `${pathway.documentsNeeded.length} item${pathway.documentsNeeded.length === 1 ? '' : 's'} needed`}</h3>{pathway.documentsNeeded.length > 0 ? <ul>{pathway.documentsNeeded.map((item) => <li key={item}>{item}</li>)}</ul> : <p>The confirmed answers satisfy the prototype’s evidence rules.</p>}</section>
+  return <section className="rail-card"><p className="eyebrow">Documents</p><h3>{pathway.documentsNeeded.length === 0 ? 'You have what you need' : `Prepare ${pathway.documentsNeeded.length} ${pathway.documentsNeeded.length === 1 ? 'item' : 'items'}`}</h3>{pathway.documentsNeeded.length > 0 ? <ul>{pathway.documentsNeeded.map((item) => <li key={item}>{item}</li>)}</ul> : <p>Your confirmed answers meet the evidence rules for this demonstration.</p>}</section>
 }
 
 function ActivityTrail() {
   const history = applicationStore.getSnapshot().history
-  return <section className="rail-card"><p className="eyebrow">Visible collaboration</p><h3>Case trail</h3>{history.length === 0 ? <p>No agent or human changes yet.</p> : <ol className="activity-list">{history.slice(-7).reverse().map((entry) => <li key={entry.id} data-actor={entry.actor}><span>{entry.actor === 'agent' ? '✦' : entry.actor === 'human' ? '●' : '✓'}</span><div><strong>{entry.action}</strong><small>{entry.detail}</small></div></li>)}</ol>}</section>
+  return <section className="rail-card"><p className="eyebrow">What changed</p><h3>Activity</h3>{history.length === 0 ? <p>No changes have been made.</p> : <ol className="activity-list">{history.slice(-7).reverse().map((entry) => <li key={entry.id} data-actor={entry.actor}><span aria-hidden="true">{entry.actor === 'agent' ? 'A' : entry.actor === 'human' ? 'Y' : 'R'}</span><div><strong>{entry.action}</strong><small>{entry.detail}</small></div></li>)}</ol>}</section>
 }
 
 function SchemaProof() {
-  return <section className="schema-proof"><p className="eyebrow">One shared contract</p><ul><li><strong>JSON Schema</strong><span>24 fields + constraints</span></li><li><strong>UI schema</strong><span>5 sections + adaptive layout</span></li><li><strong>Rules</strong><span>7 official requirements</span></li><li><strong>WebMCP</strong><span>6 tools · no submit</span></li></ul></section>
+  return <section className="schema-proof"><p className="eyebrow">How this page works</p><ul><li><strong>JSON Schema</strong><span>24 questions and constraints</span></li><li><strong>UI schema</strong><span>5 sections and an adaptive layout</span></li><li><strong>Council rules</strong><span>7 published requirements</span></li><li><strong>WebMCP</strong><span>6 site tools · no submit tool</span></li></ul></section>
 }
 
 function ReviewPanel() {
   const review = applicationStore.getReview()
   return (
     <section className="review-panel" aria-labelledby="review-title">
-      <p className="eyebrow">Human review</p><h1 id="review-title">Check the pathway before you submit</h1>
-      <div className="review-boundary"><strong>Your agent’s work stops here.</strong><span>It can inspect and check this review, but it has no submission tool.</span></div>
+      <p className="eyebrow">Final review</p><h1 id="review-title">Review your answers</h1>
+      <div className="review-boundary"><strong>Only you can submit this application.</strong><span>Your agent can check this page, but the website gives it no submission tool.</span></div>
       <dl>{review.answers.map((item) => <div key={item.questionId}><dt>{item.label}</dt><dd>{item.value}</dd></div>)}</dl>
       <div className="review-actions"><button className="button button--primary" type="button" onClick={() => applicationStore.submit()}>Submit fictional application</button><button className="text-button" type="button" onClick={() => applicationStore.configure({ active: true }, 'human')}>Return to application</button></div>
     </section>
@@ -355,9 +355,9 @@ function ReviewPanel() {
 }
 
 function SuccessPanel() {
-  return <section className="success-panel"><span className="complete-mark">✓</span><p className="eyebrow">Fictional demo complete</p><h1>Application received</h1><p>Reference <strong>ALD-DEMO-2047</strong>. Nothing was sent to a real council.</p><button className="button button--primary" type="button" onClick={() => applicationStore.reset()}>Restart demo</button></section>
+  return <section className="success-panel"><span className="complete-mark" aria-hidden="true">✓</span><p className="eyebrow">Demonstration complete</p><h1>Application received</h1><p>Your reference is <strong>ALD-DEMO-2047</strong>. Nothing was sent to a real council.</p><button className="button button--primary" type="button" onClick={() => applicationStore.reset()}>Start again</button></section>
 }
 
 function SiteFooter() {
-  return <footer className="site-footer"><div className="page-width"><strong>Alderwick Home Support</strong><span>Schema-driven adaptive public service · fictional WebMCP prototype</span></div></footer>
+  return <footer className="site-footer"><div className="page-width"><strong>Alderwick Council</strong><span>The website knows the rules. Your agent knows you. Together they build the right interface.</span></div></footer>
 }
