@@ -1,187 +1,43 @@
-export type PresentationMode = 'overview' | 'guided'
-export type Actor = 'human' | 'agent'
+import {
+  formContract,
+  getQuestion,
+  isQuestionId,
+  isRequirementId,
+  questionIds,
+  questions,
+  requirements,
+  sections,
+  validationRules,
+  type AnswerValue,
+  type QuestionDefinition,
+  type QuestionId,
+  type RequirementId,
+} from './formDefinition'
+
+export {
+  formContract,
+  getQuestion,
+  questionIds,
+  questions,
+  requirements,
+  sections,
+  type AnswerValue,
+  type QuestionDefinition,
+  type QuestionId,
+  type RequirementId,
+}
+
+export type Actor = 'human' | 'agent' | 'service'
 export type ApplicationScreen = 'application' | 'review' | 'submitted'
 
-export const questionIds = [
-  'property_postcode',
-  'owner_occupier',
-  'financial_criterion',
-  'repair_type',
-  'repair_description',
-  'urgent_impact',
-  'estimated_cost',
-  'evidence_status',
-] as const
-
-export type QuestionId = (typeof questionIds)[number]
-export type AnswerValue = string | number
-
-export interface AnswerOption {
-  value: string
-  label: string
-}
-
-export interface QuestionDefinition {
-  id: QuestionId
-  label: string
-  shortLabel: string
-  hint: string
-  requirementId?: RequirementId
-  input: 'text' | 'textarea' | 'radio'
-  options?: readonly AnswerOption[]
-}
-
-export const requirements = {
-  'REQ-AREA': {
-    id: 'REQ-AREA',
-    title: 'Alderwick area',
-    officialRule: 'The home must be in an AW1, AW2, AW3 or AW4 postcode.',
-    plainLanguage: 'This demo only covers the fictional borough of Alderwick.',
-    evidence: 'The postcode answer is enough in the prototype.',
-  },
-  'REQ-HOME': {
-    id: 'REQ-HOME',
-    title: 'Your home',
-    officialRule: 'You must own the property and live there as your main home.',
-    plainLanguage: 'This particular demo grant is for owner-occupiers, not landlords or tenants.',
-    evidence:
-      'A mortgage statement, title record or similar proof would be accepted in a real version. Nothing is uploaded here.',
-  },
-  'REQ-INCOME': {
-    id: 'REQ-INCOME',
-    title: 'Financial condition',
-    officialRule:
-      'Your household must receive one of the benefits listed in the question or have annual income below £25,000 before tax.',
-    plainLanguage: 'You need to meet one of the two financial conditions, not both.',
-    evidence:
-      'A benefit decision notice or a recent household income summary would be accepted. Nothing is uploaded here.',
-  },
-  'REQ-URGENT': {
-    id: 'REQ-URGENT',
-    title: 'Urgent impact',
-    officialRule: 'The repair must remove an essential service or create an immediate safety risk.',
-    plainLanguage: 'The scheme is for problems that need prompt attention, not routine improvements.',
-    evidence: 'Your impact answer and repair description are used for this demo.',
-  },
-  'REQ-COST': {
-    id: 'REQ-COST',
-    title: 'Repair cost',
-    officialRule: 'The repair must be expected to cost between £250 and £7,500 including tax.',
-    plainLanguage: 'Costs outside this range are not covered by the fictional scheme.',
-    evidence: 'A contractor estimate would show the expected total.',
-  },
-  'REQ-EVIDENCE': {
-    id: 'REQ-EVIDENCE',
-    title: 'Supporting evidence',
-    officialRule: 'You must have a contractor estimate, clear photos, or both.',
-    plainLanguage: 'Tell us what you already have. The demo does not upload or inspect files.',
-    evidence: 'One estimate, clear photos, or both.',
-  },
-} as const
-
-export type RequirementId = keyof typeof requirements
-
-export const questions: readonly QuestionDefinition[] = [
-  {
-    id: 'property_postcode',
-    label: 'What is the property postcode?',
-    shortLabel: 'Property postcode',
-    hint: 'For this demo, use an Alderwick postcode from AW1 to AW4.',
-    requirementId: 'REQ-AREA',
-    input: 'text',
-  },
-  {
-    id: 'owner_occupier',
-    label: 'Do you own the property and live there as your main home?',
-    shortLabel: 'Own and live in the property',
-    hint: 'This is sometimes called being an owner-occupier.',
-    requirementId: 'REQ-HOME',
-    input: 'radio',
-    options: [
-      { value: 'yes', label: 'Yes' },
-      { value: 'no', label: 'No' },
-    ],
-  },
-  {
-    id: 'financial_criterion',
-    label: 'Which financial condition applies to your household?',
-    shortLabel: 'Financial condition',
-    hint:
-      'Qualifying benefits for this demo are Universal Credit, Pension Credit, Income Support, income-based Jobseeker’s Allowance, income-related Employment and Support Allowance and Housing Benefit. Otherwise, use income before tax for everyone who normally lives in the home.',
-    requirementId: 'REQ-INCOME',
-    input: 'radio',
-    options: [
-      { value: 'qualifying_benefit', label: 'Someone in the household receives an income-related benefit' },
-      { value: 'income_under_25000', label: 'Annual household income is below £25,000 before tax' },
-      { value: 'neither', label: 'Neither of these' },
-      { value: 'not_sure', label: 'I’m not sure' },
-    ],
-  },
-  {
-    id: 'repair_type',
-    label: 'What needs repairing?',
-    shortLabel: 'Type of repair',
-    hint: 'Choose the main problem. You can add detail next.',
-    input: 'radio',
-    options: [
-      { value: 'heating', label: 'Heating or hot water' },
-      { value: 'electrics', label: 'Electrical system' },
-      { value: 'structure', label: 'Walls, roof or structure' },
-      { value: 'water_ingress', label: 'Water entering the home' },
-      { value: 'other', label: 'Another urgent repair' },
-    ],
-  },
-  {
-    id: 'repair_description',
-    label: 'Describe what has happened',
-    shortLabel: 'What happened',
-    hint: 'Say what has stopped working or become unsafe, and when it began. Do not include medical details.',
-    input: 'textarea',
-  },
-  {
-    id: 'urgent_impact',
-    label: 'How is the problem affecting the home now?',
-    shortLabel: 'Current impact',
-    hint: 'Choose the closest answer.',
-    requirementId: 'REQ-URGENT',
-    input: 'radio',
-    options: [
-      { value: 'no_heating_or_hot_water', label: 'There is no main heating or hot water' },
-      { value: 'dangerous_electrics', label: 'There are sparks, burning smells or exposed live parts' },
-      { value: 'unsafe_structure', label: 'Part of the home may collapse or cannot be used safely' },
-      { value: 'active_water_risk', label: 'Water is entering and may damage electrics or the structure' },
-      { value: 'other_immediate_risk', label: 'There is another immediate safety risk' },
-      { value: 'no_immediate_risk', label: 'None of these' },
-    ],
-  },
-  {
-    id: 'estimated_cost',
-    label: 'What is the expected repair cost?',
-    shortLabel: 'Expected cost',
-    hint: 'Enter a whole amount from £250 to £7,500, including tax. A rough amount is enough for this demo.',
-    requirementId: 'REQ-COST',
-    input: 'text',
-  },
-  {
-    id: 'evidence_status',
-    label: 'What supporting evidence do you have?',
-    shortLabel: 'Evidence ready',
-    hint: 'You will not upload anything in this prototype.',
-    requirementId: 'REQ-EVIDENCE',
-    input: 'radio',
-    options: [
-      { value: 'estimate_ready', label: 'A contractor estimate' },
-      { value: 'photos_ready', label: 'Clear photos of the problem' },
-      { value: 'both_ready', label: 'An estimate and photos' },
-      { value: 'none_ready', label: 'Neither is ready' },
-    ],
-  },
-]
-
-export interface InteractionPreferences {
+export interface AssistancePreferences {
   keyboardNavigation: boolean
   reducedMotion: boolean
   plainLanguage: boolean
+}
+
+export interface AssistanceState extends AssistancePreferences {
+  active: boolean
 }
 
 export interface ActivityEntry {
@@ -194,13 +50,14 @@ export interface ActivityEntry {
 export interface PendingAnswerProposal {
   questionId: QuestionId
   value: AnswerValue
+  rationale?: string
 }
 
 export interface ApplicationState {
-  mode: PresentationMode
-  preferences: InteractionPreferences
+  assistance: AssistanceState
   answers: Partial<Record<QuestionId, AnswerValue>>
-  pendingProposal: PendingAnswerProposal | null
+  pendingProposals: readonly PendingAnswerProposal[]
+  validationVisible: boolean
   screen: ApplicationScreen
   history: readonly ActivityEntry[]
   nextActivityId: number
@@ -212,7 +69,7 @@ export type IssueSeverity = 'ineligible' | 'incomplete'
 export interface ValidationIssue {
   code: string
   questionId: QuestionId
-  requirementId: RequirementId | 'COMP-DESCRIPTION'
+  requirementId: RequirementId | 'FORM-COMPLETENESS'
   severity: IssueSeverity
   title: string
   message: string
@@ -223,6 +80,18 @@ export interface ApplicationStep {
   currentValue: AnswerValue | null
   reason: 'incomplete' | 'needs-correction'
   issue: ValidationIssue | null
+  sectionTitle: string
+  whyAsked: string
+}
+
+export interface PathwaySummary {
+  totalQuestions: number
+  relevantQuestionIds: readonly QuestionId[]
+  notApplicableQuestionIds: readonly QuestionId[]
+  answeredRelevant: number
+  remainingRelevant: number
+  documentsNeeded: readonly string[]
+  currentSection: string | null
 }
 
 export interface ReviewItem {
@@ -233,6 +102,7 @@ export interface ReviewItem {
 
 export interface ApplicationReview {
   ready: boolean
+  pathway: PathwaySummary
   answers: readonly ReviewItem[]
   issues: readonly ValidationIssue[]
   agentChanges: readonly ActivityEntry[]
@@ -252,41 +122,59 @@ export class DomainError extends Error {
   }
 }
 
-const seededAnswers: Partial<Record<QuestionId, AnswerValue>> = {
+export const completedDemoAnswers: Partial<Record<QuestionId, AnswerValue>> = {
   property_postcode: 'AW2 4LA',
-  owner_occupier: 'yes',
-  financial_criterion: 'qualifying_benefit',
+  tenure: 'owner_occupier',
+  main_home: 'yes',
+  years_at_property: 6,
+  preferred_contact: 'email',
+  household_size: 2,
+  financial_route: 'qualifying_benefit',
+  benefit_type: 'universal_credit',
+  savings_band: 'under_6000',
   repair_type: 'heating',
-  repair_description: 'boiler problem',
-  urgent_impact: 'no_heating_or_hot_water',
-  estimated_cost: 3200,
-  evidence_status: 'none_ready',
+  repair_description: 'The boiler stopped working two days ago. There is no heating or hot water.',
+  problem_started: 'last_3_days',
+  heating_status: 'none',
+  immediate_impact: 'essential_service_lost',
+  temporary_measures: 'yes',
+  estimated_cost: 2450,
+  quote_status: 'estimate_ready',
+  contractor_name: 'Alderwick Heating Services',
+  photo_status: 'none',
+  ownership_evidence: 'ready',
+  declaration_accuracy: 'yes',
 }
 
-export const correctedDemoAnswers: Partial<Record<QuestionId, AnswerValue>> = {
-  ...seededAnswers,
-  repair_description: 'The boiler stopped working two days ago. There is no heating or hot water.',
-  evidence_status: 'estimate_ready',
-}
+export const demoAgentProposals: readonly PendingAnswerProposal[] = [
+  { questionId: 'property_postcode', value: 'AW2 4LA', rationale: 'You said the repair is at your Alderwick home.' },
+  { questionId: 'tenure', value: 'owner_occupier', rationale: 'You said you own and live in the property.' },
+  { questionId: 'main_home', value: 'yes', rationale: 'You described it as your home.' },
+  { questionId: 'financial_route', value: 'qualifying_benefit', rationale: 'You said you receive Universal Credit.' },
+  { questionId: 'benefit_type', value: 'universal_credit', rationale: 'This is the benefit you named.' },
+  { questionId: 'repair_type', value: 'heating', rationale: 'The reported problem is a failed boiler.' },
+  { questionId: 'estimated_cost', value: 2450, rationale: 'You said the written estimate is £2,450.' },
+]
 
 export function createInitialState(): ApplicationState {
   return {
-    mode: 'overview',
-    preferences: {
+    assistance: {
+      active: false,
       keyboardNavigation: false,
       reducedMotion: false,
       plainLanguage: false,
     },
-    answers: { ...seededAnswers },
-    pendingProposal: null,
+    answers: {},
+    pendingProposals: [],
+    validationVisible: false,
     screen: 'application',
     history: [],
     nextActivityId: 1,
-    announcement: 'Original demo answers are ready.',
+    announcement: 'A blank fictional application is ready.',
   }
 }
 
-function appendActivity(
+export function recordActivity(
   state: ApplicationState,
   actor: Actor,
   action: string,
@@ -301,76 +189,29 @@ function appendActivity(
   }
 }
 
-export function configureInteraction(
+export function configureAssistance(
   state: ApplicationState,
-  input: Partial<InteractionPreferences> & { mode?: PresentationMode },
-  actor: Actor,
+  input: Partial<AssistanceState>,
+  actor: 'human' | 'agent',
 ): ApplicationState {
-  const mode = input.mode ?? state.mode
-  if (mode !== 'overview' && mode !== 'guided') {
-    throw new DomainError('invalid_mode', 'Mode must be overview or guided.')
-  }
-
-  const preferences = { ...state.preferences, ...pickBooleanPreferences(input) }
-  const changes: string[] = []
-  if (mode !== state.mode) {
-    changes.push(
-      actor === 'agent'
-        ? mode === 'guided'
-          ? 'Agent changed the form to one question at a time.'
-          : 'Agent changed the form to show all questions.'
-        : mode === 'guided'
-          ? 'You changed the form to one question at a time.'
-          : 'You changed the form back to show all questions.',
-    )
-  }
-  if (preferences.keyboardNavigation !== state.preferences.keyboardNavigation) {
-    changes.push(
-      `${actor === 'agent' ? 'Agent' : 'You'} ${preferences.keyboardNavigation ? 'showed' : 'hid'} keyboard hints.`,
-    )
-  }
-  if (preferences.plainLanguage !== state.preferences.plainLanguage) {
-    changes.push(
-      `${actor === 'agent' ? 'Agent' : 'You'} turned ${preferences.plainLanguage ? 'on' : 'off'} plain-language explanations.`,
-    )
-  }
-  if (preferences.reducedMotion !== state.preferences.reducedMotion) {
-    changes.push(
-      `${actor === 'agent' ? 'Agent' : 'You'} ${preferences.reducedMotion ? 'reduced' : 'restored'} non-essential motion.`,
-    )
-  }
-
-  if (changes.length === 0) {
-    return state.screen === 'application' ? state : { ...state, screen: 'application' }
-  }
-
-  return appendActivity(
-    { ...state, mode, preferences, screen: 'application' },
-    actor,
-    actor === 'agent' ? 'Agent changed presentation' : 'You changed presentation',
-    changes.join(' '),
-    changes.join(' '),
-  )
-}
-
-function pickBooleanPreferences(
-  input: Partial<InteractionPreferences>,
-): Partial<InteractionPreferences> {
-  const result: Partial<InteractionPreferences> = {}
-  const keys: readonly (keyof InteractionPreferences)[] = [
-    'keyboardNavigation',
-    'reducedMotion',
-    'plainLanguage',
-  ]
-  for (const key of keys) {
+  const next = { ...state.assistance }
+  for (const key of ['active', 'keyboardNavigation', 'reducedMotion', 'plainLanguage'] as const) {
     if (key in input) {
-      if (typeof input[key] !== 'boolean') {
-        throw new DomainError('invalid_preference', `${key} must be a boolean.`)
-      }
-      result[key] = input[key]
+      if (typeof input[key] !== 'boolean') throw new DomainError('invalid_preference', `${key} must be a boolean.`)
+      next[key] = input[key] as boolean
     }
   }
-  return result
+  if (JSON.stringify(next) === JSON.stringify(state.assistance)) return state
+
+  const enabled = next.active && !state.assistance.active
+  return recordActivity(
+    { ...state, assistance: next, screen: 'application' },
+    actor,
+    actor === 'agent' ? 'WebMCP · configure_assistance' : 'You changed assistance settings',
+    enabled
+      ? 'The agent opened a focused pathway using the service’s approved adaptive layout.'
+      : `The ${actor === 'agent' ? 'agent' : 'applicant'} updated presentation preferences.`,
+  )
 }
 
 export function setHumanAnswer(
@@ -379,126 +220,138 @@ export function setHumanAnswer(
   value: string,
 ): ApplicationState {
   const answer = normalizeAnswer(questionId, value)
-  assertAnswer(questionId, answer)
-  return {
-    ...state,
-    answers: { ...state.answers, [questionId]: answer },
-    screen: 'application',
+  const answers = { ...state.answers }
+  if (String(answer).trim() === '') delete answers[questionId]
+  else {
+    assertAnswer(questionId, answer, false)
+    answers[questionId] = answer
   }
+  return { ...state, answers, validationVisible: false, screen: 'application' }
 }
 
-export function proposeAnswer(
+export function proposeAnswers(
   state: ApplicationState,
-  input: { questionId: string; value: unknown },
-  actor: 'agent',
+  inputs: readonly { questionId: string; value: unknown; rationale?: unknown }[],
 ): ApplicationState {
-  if (state.pendingProposal) {
-    throw new DomainError(
-      'proposal_pending',
-      'The applicant must confirm or reject the current proposal before the agent proposes another answer.',
-    )
-  }
-  if (!isQuestionId(input.questionId)) {
-    throw new DomainError('unknown_question', 'The agent could not propose that answer. The question is not recognised.')
-  }
-  if (typeof input.value !== 'string' && typeof input.value !== 'number') {
-    throw new DomainError('invalid_value', 'The answer must be text or a number.')
-  }
-  const answer = normalizeAnswer(input.questionId, input.value)
-  assertAnswer(input.questionId, answer)
+  if (inputs.length === 0 || inputs.length > 8) throw new DomainError('invalid_proposals', 'Propose between 1 and 8 answers at a time.')
+  if (state.pendingProposals.length > 0) throw new DomainError('proposal_pending', 'The applicant must review the current proposals before more are added.')
 
-  const question = getQuestion(input.questionId)
-  const answerLabel = formatAnswer(input.questionId, answer)
-  return appendActivity(
-    {
-      ...state,
-      pendingProposal: { questionId: input.questionId, value: answer },
-      screen: 'application',
-    },
-    actor,
-    'Agent proposed an answer',
-    `Agent proposed “${answerLabel}” for “${question.shortLabel}”. Review it before it changes your application.`,
-    `Agent proposed ${question.shortLabel}: ${answerLabel}. Confirm or reject it before continuing.`,
+  const seen = new Set<QuestionId>()
+  const proposals = inputs.map((input): PendingAnswerProposal => {
+    if (!isQuestionId(input.questionId)) throw new DomainError('unknown_question', `Unknown question: ${input.questionId}.`)
+    const question = getQuestion(input.questionId)
+    if (!question.agentWritable) throw new DomainError('human_only_field', `${question.shortLabel} can only be answered by the applicant.`)
+    if (seen.has(input.questionId)) throw new DomainError('duplicate_proposal', `Only propose one answer for ${question.shortLabel}.`)
+    seen.add(input.questionId)
+    if (typeof input.value !== 'string' && typeof input.value !== 'number') throw new DomainError('invalid_value', 'Answers must be text or numbers.')
+    const value = normalizeAnswer(input.questionId, input.value)
+    assertAnswer(input.questionId, value, true)
+    const rationale = typeof input.rationale === 'string' ? input.rationale.trim().slice(0, 180) : undefined
+    return { questionId: input.questionId, value, ...(rationale ? { rationale } : {}) }
+  })
+
+  return recordActivity(
+    { ...state, pendingProposals: proposals, screen: 'application' },
+    'agent',
+    'WebMCP · propose_answers',
+    `The agent mapped your description to ${proposals.length} structured answer${proposals.length === 1 ? '' : 's'}. Nothing is stored until you confirm each one.`,
+    `${proposals.length} agent proposals are ready for your review.`,
   )
 }
 
-export function confirmPendingProposal(state: ApplicationState): ApplicationState {
-  const proposal = state.pendingProposal
-  if (!proposal) {
-    throw new DomainError('no_pending_proposal', 'There is no agent proposal to confirm.')
-  }
-
-  // Validate again at the human decision boundary rather than trusting the
-  // earlier agent call or storing an unvalidated pending value.
-  assertAnswer(proposal.questionId, proposal.value)
-  const question = getQuestion(proposal.questionId)
-  const answerLabel = formatAnswer(proposal.questionId, proposal.value)
-  const previous = state.answers[proposal.questionId]
-  const detail = previous === undefined
-    ? `You confirmed the agent’s proposal for “${question.shortLabel}”: “${answerLabel}”.`
-    : `You confirmed the agent’s proposal to change “${question.shortLabel}” from “${formatAnswer(proposal.questionId, previous)}” to “${answerLabel}”.`
-
-  return appendActivity(
+export function confirmProposal(state: ApplicationState, questionId: QuestionId): ApplicationState {
+  const proposal = state.pendingProposals.find((candidate) => candidate.questionId === questionId)
+  if (!proposal) throw new DomainError('no_pending_proposal', 'That proposal is no longer waiting for review.')
+  assertAnswer(questionId, proposal.value, true)
+  const question = getQuestion(questionId)
+  return recordActivity(
     {
       ...state,
-      answers: { ...state.answers, [proposal.questionId]: proposal.value },
-      pendingProposal: null,
-      screen: 'application',
+      answers: { ...state.answers, [questionId]: proposal.value },
+      pendingProposals: state.pendingProposals.filter((candidate) => candidate.questionId !== questionId),
+      validationVisible: false,
     },
     'human',
     'You confirmed an agent proposal',
-    detail,
-    `You confirmed the proposed answer for ${question.shortLabel}. The application answer is now ${answerLabel}.`,
+    `You confirmed “${formatAnswer(questionId, proposal.value)}” for “${question.shortLabel}”.`,
   )
 }
 
-export function rejectPendingProposal(state: ApplicationState): ApplicationState {
-  const proposal = state.pendingProposal
-  if (!proposal) {
-    throw new DomainError('no_pending_proposal', 'There is no agent proposal to reject.')
-  }
-  const question = getQuestion(proposal.questionId)
-  const answerLabel = formatAnswer(proposal.questionId, proposal.value)
-
-  return appendActivity(
-    { ...state, pendingProposal: null, screen: 'application' },
+export function rejectProposal(state: ApplicationState, questionId: QuestionId): ApplicationState {
+  const proposal = state.pendingProposals.find((candidate) => candidate.questionId === questionId)
+  if (!proposal) throw new DomainError('no_pending_proposal', 'That proposal is no longer waiting for review.')
+  const question = getQuestion(questionId)
+  return recordActivity(
+    { ...state, pendingProposals: state.pendingProposals.filter((candidate) => candidate.questionId !== questionId) },
     'human',
     'You rejected an agent proposal',
-    `You rejected the agent’s proposed answer “${answerLabel}” for “${question.shortLabel}”. The application answer did not change.`,
-    `You rejected the proposed answer for ${question.shortLabel}. The application answer did not change.`,
+    `You rejected the proposed answer for “${question.shortLabel}”. The application did not change.`,
   )
+}
+
+export function isQuestionApplicable(
+  question: QuestionDefinition,
+  answers: Partial<Record<QuestionId, AnswerValue>>,
+): boolean {
+  if (!question.appliesWhen) return true
+  return answers[question.appliesWhen.field] === question.appliesWhen.equals
+}
+
+export function getPathway(state: ApplicationState): PathwaySummary {
+  const relevant = questions.filter((question) => isQuestionApplicable(question, state.answers))
+  const relevantIds = relevant.map((question) => question.id)
+  const notApplicableIds = questionIds.filter((id) => !relevantIds.includes(id))
+  const answeredRelevant = relevant.filter((question) => hasAnswer(state.answers[question.id])).length
+  const currentQuestion = relevant.find((question) => !hasAnswer(state.answers[question.id])) ?? getApplicationStep(state)?.question
+  const currentSection = currentQuestion
+    ? sections.find((section) => section.questions.includes(currentQuestion.id))?.title ?? null
+    : null
+  const documentsNeeded: string[] = []
+  if (state.answers.quote_status !== 'estimate_ready' && state.answers.photo_status !== 'photos_ready') documentsNeeded.push('written estimate or clear photographs')
+  if (state.answers.ownership_evidence !== 'ready') documentsNeeded.push('proof of ownership')
+
+  return {
+    totalQuestions: questions.length,
+    relevantQuestionIds: relevantIds,
+    notApplicableQuestionIds: notApplicableIds,
+    answeredRelevant,
+    remainingRelevant: relevant.length - answeredRelevant,
+    documentsNeeded,
+    currentSection,
+  }
+}
+
+function hasAnswer(value: AnswerValue | undefined): boolean {
+  return value !== undefined && String(value).trim() !== ''
 }
 
 function normalizeAnswer(questionId: QuestionId, value: string | number): AnswerValue {
-  if (questionId === 'estimated_cost' && String(value).trim().match(/^\d+$/)) {
-    return Number(value)
+  const question = getQuestion(questionId)
+  if (question.type === 'integer' && /^\d+$/.test(String(value).trim())) return Number(value)
+  if (questionId === 'property_postcode') {
+    const compact = String(value).toUpperCase().replace(/\s+/g, '')
+    return compact.length > 3 ? `${compact.slice(0, 3)} ${compact.slice(3)}` : compact
   }
-  if (questionId === 'property_postcode') return normalizePostcode(String(value))
   return typeof value === 'string' ? value.trim() : value
 }
 
-export function normalizePostcode(value: string): string {
-  const compact = value.toUpperCase().replace(/\s+/g, '')
-  return compact.length > 3 ? `${compact.slice(0, 3)} ${compact.slice(3)}` : compact
-}
-
-function assertAnswer(questionId: QuestionId, value: AnswerValue): void {
+function assertAnswer(questionId: QuestionId, value: AnswerValue, requireComplete: boolean): void {
   const question = getQuestion(questionId)
-  if (String(value).trim() === '') {
-    throw new DomainError('invalid_value', `${question.shortLabel} cannot be empty.`)
-  }
-  if (question.options && !question.options.some((option) => option.value === value)) {
-    throw new DomainError('invalid_value', `${question.shortLabel} must use one of the allowed values.`)
-  }
-  if (questionId === 'repair_description' && String(value).length > 500) {
-    throw new DomainError('invalid_value', 'Shorten the description to 500 characters or fewer.')
+  if (!hasAnswer(value)) throw new DomainError('invalid_value', `${question.shortLabel} cannot be empty.`)
+  if (question.type === 'integer' && (typeof value !== 'number' || !Number.isInteger(value))) throw new DomainError('invalid_value', `${question.shortLabel} must be a whole number.`)
+  if (question.options && !question.options.some((option) => option.value === value)) throw new DomainError('invalid_value', `${question.shortLabel} must use one of the allowed values.`)
+  if (requireComplete) {
+    if (question.minLength !== undefined && String(value).length < question.minLength) throw new DomainError('invalid_value', `${question.shortLabel} needs more detail.`)
+    if (question.maxLength !== undefined && String(value).length > question.maxLength) throw new DomainError('invalid_value', `${question.shortLabel} is too long.`)
+    if (question.minimum !== undefined && Number(value) < question.minimum) throw new DomainError('invalid_value', `${question.shortLabel} is below the allowed minimum.`)
+    if (question.maximum !== undefined && Number(value) > question.maximum) throw new DomainError('invalid_value', `${question.shortLabel} is above the allowed maximum.`)
   }
 }
 
 function issue(
   code: string,
   questionId: QuestionId,
-  requirementId: RequirementId | 'COMP-DESCRIPTION',
+  requirementId: RequirementId | 'FORM-COMPLETENESS',
   severity: IssueSeverity,
   message: string,
 ): ValidationIssue {
@@ -507,161 +360,130 @@ function issue(
 
 export function validateApplication(state: ApplicationState): readonly ValidationIssue[] {
   const issues: ValidationIssue[] = []
-  const answers = state.answers
+  const required = new Set(formContract.schema.required as QuestionId[])
 
-  if (!answers.property_postcode) {
-    issues.push(issue('postcode_empty', 'property_postcode', 'REQ-AREA', 'incomplete', 'Enter the property postcode.'))
-  } else if (!/^AW\d \d[A-Z]{2}$/.test(String(answers.property_postcode))) {
-    issues.push(issue('postcode_format', 'property_postcode', 'REQ-AREA', 'ineligible', 'Enter an Alderwick demo postcode, for example AW2 4LA.'))
-  } else if (!/^AW[1-4] \d[A-Z]{2}$/.test(String(answers.property_postcode))) {
-    issues.push(issue('postcode_area', 'property_postcode', 'REQ-AREA', 'ineligible', 'Enter a postcode in the fictional Alderwick area, from AW1 to AW4.'))
+  for (const question of questions) {
+    if (!isQuestionApplicable(question, state.answers)) continue
+    const value = state.answers[question.id]
+    const requirementId = question.requirementId ?? 'FORM-COMPLETENESS'
+    if ((required.has(question.id) || question.appliesWhen) && !hasAnswer(value)) {
+      issues.push(issue(`required_${question.id}`, question.id, requirementId, 'incomplete', `Answer “${question.shortLabel}”.`))
+      continue
+    }
+    if (!hasAnswer(value)) continue
+    if (question.type === 'integer' && (typeof value !== 'number' || !Number.isInteger(value))) {
+      issues.push(issue(`type_${question.id}`, question.id, requirementId, 'incomplete', `Enter ${question.shortLabel.toLowerCase()} as a whole number.`))
+      continue
+    }
+    if (question.pattern && !new RegExp(question.pattern).test(String(value))) {
+      const message = question.id === 'property_postcode'
+        ? 'Enter an Alderwick demo postcode from AW1 to AW4, for example AW2 4LA.'
+        : `Check the format of ${question.shortLabel.toLowerCase()}.`
+      issues.push(issue(`pattern_${question.id}`, question.id, requirementId, 'ineligible', message))
+    }
+    if (question.minLength !== undefined && String(value).length < question.minLength) issues.push(issue(`min_length_${question.id}`, question.id, requirementId, 'incomplete', `Add more detail to ${question.shortLabel.toLowerCase()}.`))
+    if (question.minimum !== undefined && Number(value) < question.minimum) issues.push(issue(`minimum_${question.id}`, question.id, requirementId, 'ineligible', `${question.shortLabel} is below the fictional scheme’s minimum.`))
+    if (question.maximum !== undefined && Number(value) > question.maximum) issues.push(issue(`maximum_${question.id}`, question.id, requirementId, 'ineligible', `${question.shortLabel} is above the fictional scheme’s maximum.`))
   }
 
-  if (!answers.owner_occupier) {
-    issues.push(issue('ownership_empty', 'owner_occupier', 'REQ-HOME', 'incomplete', 'Select whether you own the property and live there as your main home.'))
-  } else if (answers.owner_occupier === 'no') {
-    issues.push(issue('ownership_no', 'owner_occupier', 'REQ-HOME', 'ineligible', 'This fictional grant is only for people who own and live in the property.'))
-  }
-
-  if (!answers.financial_criterion) {
-    issues.push(issue('financial_empty', 'financial_criterion', 'REQ-INCOME', 'incomplete', 'Select the financial condition that applies to your household.'))
-  } else if (answers.financial_criterion === 'not_sure') {
-    issues.push(issue('financial_unsure', 'financial_criterion', 'REQ-INCOME', 'incomplete', 'Find out whether your household receives an income-related benefit or has annual income below £25,000, then select an answer.'))
-  } else if (answers.financial_criterion === 'neither') {
-    issues.push(issue('financial_neither', 'financial_criterion', 'REQ-INCOME', 'ineligible', 'This fictional grant is only for households that meet one of the financial conditions.'))
-  }
-
-  if (!answers.repair_type) {
-    issues.push(issue('repair_type_empty', 'repair_type', 'REQ-URGENT', 'incomplete', 'Select the main type of repair.'))
-  }
-
-  const description = String(answers.repair_description ?? '').trim()
-  if (!description) {
-    issues.push(issue('description_empty', 'repair_description', 'COMP-DESCRIPTION', 'incomplete', 'Describe what has happened.'))
-  } else if (!isSpecificRepairDescription(description)) {
-    issues.push(issue('description_vague', 'repair_description', 'COMP-DESCRIPTION', 'incomplete', 'Add more detail: say what has stopped working or become unsafe, and when it began.'))
-  }
-
-  if (!answers.urgent_impact) {
-    issues.push(issue('urgent_empty', 'urgent_impact', 'REQ-URGENT', 'incomplete', 'Select how the problem is affecting the home now.'))
-  } else if (answers.urgent_impact === 'no_immediate_risk') {
-    issues.push(issue('urgent_none', 'urgent_impact', 'REQ-URGENT', 'ineligible', 'This fictional grant only covers loss of an essential service or an immediate safety risk.'))
-  }
-
-  const cost = answers.estimated_cost
-  if (cost === undefined || cost === '') {
-    issues.push(issue('cost_empty', 'estimated_cost', 'REQ-COST', 'incomplete', 'Enter the expected repair cost.'))
-  } else if (typeof cost !== 'number' || !Number.isInteger(cost)) {
-    issues.push(issue('cost_whole_number', 'estimated_cost', 'REQ-COST', 'incomplete', 'Enter the cost in whole pounds, without pence.'))
-  } else if (cost < 250) {
-    issues.push(issue('cost_low', 'estimated_cost', 'REQ-COST', 'ineligible', 'Enter a cost of at least £250 for this fictional grant.'))
-  } else if (cost > 7500) {
-    issues.push(issue('cost_high', 'estimated_cost', 'REQ-COST', 'ineligible', 'Enter a cost of no more than £7,500 for this fictional grant.'))
-  }
-
-  if (!answers.evidence_status) {
-    issues.push(issue('evidence_empty', 'evidence_status', 'REQ-EVIDENCE', 'incomplete', 'Select what supporting evidence you have.'))
-  } else if (answers.evidence_status === 'none_ready') {
-    issues.push(issue('evidence_none', 'evidence_status', 'REQ-EVIDENCE', 'incomplete', 'You need a contractor estimate or clear photos before review.'))
+  for (const rule of validationRules) {
+    if (rule.kind === 'disallow' && rule.values.includes(String(state.answers[rule.field] ?? ''))) {
+      issues.push(issue(rule.code, rule.field, rule.requirementId, rule.severity, rule.message))
+    }
+    if (
+      rule.kind === 'requiresAny'
+      && hasAnswer(state.answers[rule.field])
+      && hasAnswer(state.answers[rule.orField])
+      && state.answers[rule.field] !== rule.equals
+      && state.answers[rule.orField] !== rule.orEquals
+    ) {
+      issues.push(issue(rule.code, rule.target, rule.requirementId, rule.severity, rule.message))
+    }
   }
 
   return issues
-}
-
-export function isSpecificRepairDescription(value: string): boolean {
-  const genericAnswers = [
-    'boiler problem',
-    'heating problem',
-    'electrical problem',
-    'roof problem',
-    'water problem',
-  ]
-  const normalized = value.trim().toLowerCase()
-  return normalized.length >= 30 && !genericAnswers.includes(normalized)
 }
 
 export function getApplicationStep(state: ApplicationState): ApplicationStep | null {
   const firstIssue = validateApplication(state)[0]
   if (!firstIssue) return null
   const question = getQuestion(firstIssue.questionId)
+  const section = sections.find((candidate) => candidate.questions.includes(question.id))
+  const requirement = question.requirementId ? requirements[question.requirementId] : undefined
   return {
     question,
     currentValue: state.answers[question.id] ?? null,
-    reason: state.answers[question.id] === undefined ? 'incomplete' : 'needs-correction',
+    reason: hasAnswer(state.answers[question.id]) ? 'needs-correction' : 'incomplete',
     issue: firstIssue,
+    sectionTitle: section?.title ?? 'Application',
+    whyAsked: requirement?.plainLanguage ?? section?.description ?? 'This answer is part of the application.',
   }
 }
 
 export function explainRequirement(requirementId: string) {
-  if (!(requirementId in requirements)) {
-    throw new DomainError('unknown_requirement', 'The requirement is not recognised.')
+  if (!isRequirementId(requirementId)) throw new DomainError('unknown_requirement', 'The requirement is not recognised.')
+  return requirements[requirementId]
+}
+
+export function inspectApplication(state: ApplicationState) {
+  const pathway = getPathway(state)
+  return {
+    title: formContract.schema.title,
+    schemaVersion: formContract.schema.$schema,
+    sections: sections.map((section) => ({ id: section.id, title: section.title, questionIds: section.questions })),
+    questions: questions.map((question) => ({
+      id: question.id,
+      label: question.label,
+      answerType: question.type,
+      input: question.input,
+      allowedValues: question.options ?? null,
+      requirementId: question.requirementId ?? null,
+      agentWritable: question.agentWritable,
+      appliesWhen: question.appliesWhen ?? null,
+      currentValue: state.answers[question.id] ?? null,
+    })),
+    pathway,
+    pendingProposalCount: state.pendingProposals.length,
   }
-  return requirements[requirementId as RequirementId]
 }
 
 export function getApplicationReview(state: ApplicationState): ApplicationReview {
   const issues = validateApplication(state)
+  const pathway = getPathway(state)
   return {
-    ready: issues.length === 0 && state.pendingProposal === null,
-    answers: questions.map((question) => ({
-      questionId: question.id,
-      label: question.shortLabel,
-      value: formatAnswer(question.id, state.answers[question.id] ?? 'Not answered'),
+    ready: issues.length === 0 && state.pendingProposals.length === 0,
+    pathway,
+    answers: pathway.relevantQuestionIds.map((questionId) => ({
+      questionId,
+      label: getQuestion(questionId).shortLabel,
+      value: formatAnswer(questionId, state.answers[questionId] ?? 'Not answered'),
     })),
     issues,
     agentChanges: state.history.filter((entry) => entry.actor === 'agent'),
     submission: {
       availableToAgent: false,
-      instruction: 'Only you can select Submit application in the visible interface.',
+      instruction: 'Only the applicant can use Submit application in the visible interface.',
     },
   }
 }
 
 export function openReview(state: ApplicationState): ApplicationState {
-  if (state.pendingProposal) {
-    return {
-      ...state,
-      screen: 'application',
-      announcement: 'Confirm or reject the agent’s proposed answer before you continue to review.',
-    }
-  }
+  if (state.pendingProposals.length > 0) return { ...state, validationVisible: true, announcement: 'Review every agent proposal before continuing.' }
   const issues = validateApplication(state)
-  if (issues.length > 0) {
-    return {
-      ...state,
-      screen: 'application',
-      announcement: `${issues.length} ${issues.length === 1 ? 'thing needs' : 'things need'} attention before review.`,
-    }
-  }
-  return { ...state, screen: 'review', announcement: 'Check your answers before you submit.' }
+  if (issues.length > 0) return { ...state, validationVisible: true, assistance: { ...state.assistance, active: true }, announcement: `${issues.length} things need attention before review.` }
+  return recordActivity({ ...state, screen: 'review', validationVisible: true }, 'human', 'You opened final review', 'You opened the final review. Submission remains a human-only action.')
 }
 
 export function submitApplication(state: ApplicationState): ApplicationState {
-  if (state.screen !== 'review' || validateApplication(state).length > 0) {
-    throw new DomainError('review_required', 'Check every answer before you submit.')
-  }
-  return {
-    ...state,
-    screen: 'submitted',
-    announcement: 'Demo application submitted. Nothing was sent.',
-  }
+  if (state.screen !== 'review' || !getApplicationReview(state).ready) throw new DomainError('not_ready', 'Complete the official checks and open review before submitting.')
+  return recordActivity({ ...state, screen: 'submitted' }, 'human', 'You submitted the fictional application', 'The fictional application was submitted. No information was sent anywhere.')
 }
 
 export function formatAnswer(questionId: QuestionId, value: AnswerValue): string {
-  if (questionId === 'estimated_cost' && typeof value === 'number') {
-    return `£${value.toLocaleString('en-GB')}`
-  }
-  const stringValue = String(value)
+  if (value === 'Not answered') return String(value)
   const question = getQuestion(questionId)
-  return question.options?.find((option) => option.value === stringValue)?.label ?? stringValue
-}
-
-export function getQuestion(questionId: QuestionId): QuestionDefinition {
-  const question = questions.find((candidate) => candidate.id === questionId)
-  if (!question) throw new DomainError('unknown_question', 'The question is not recognised.')
-  return question
-}
-
-export function isQuestionId(value: string): value is QuestionId {
-  return questionIds.includes(value as QuestionId)
+  const option = question.options?.find((candidate) => candidate.value === value)
+  if (option) return option.label
+  if (question.input === 'currency' && typeof value === 'number') return `£${value.toLocaleString('en-GB')}`
+  return String(value)
 }

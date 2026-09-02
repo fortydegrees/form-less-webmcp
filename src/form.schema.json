@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://alderwick.example/schemas/urgent-home-repair-application.json",
+  "title": "Urgent home-repair grant application",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "property_postcode",
+    "tenure",
+    "main_home",
+    "years_at_property",
+    "preferred_contact",
+    "household_size",
+    "financial_route",
+    "savings_band",
+    "repair_type",
+    "repair_description",
+    "problem_started",
+    "immediate_impact",
+    "temporary_measures",
+    "estimated_cost",
+    "quote_status",
+    "photo_status",
+    "ownership_evidence",
+    "declaration_accuracy"
+  ],
+  "allOf": [
+    { "if": { "properties": { "financial_route": { "const": "qualifying_benefit" } }, "required": ["financial_route"] }, "then": { "required": ["benefit_type"] } },
+    { "if": { "properties": { "financial_route": { "const": "income_under_25000" } }, "required": ["financial_route"] }, "then": { "required": ["annual_income"] } },
+    { "if": { "properties": { "repair_type": { "const": "heating" } }, "required": ["repair_type"] }, "then": { "required": ["heating_status"] } },
+    { "if": { "properties": { "repair_type": { "const": "electrics" } }, "required": ["repair_type"] }, "then": { "required": ["electrical_risk"] } },
+    { "if": { "properties": { "repair_type": { "const": "structure" } }, "required": ["repair_type"] }, "then": { "required": ["structural_risk"] } },
+    { "if": { "properties": { "quote_status": { "const": "estimate_ready" } }, "required": ["quote_status"] }, "then": { "required": ["contractor_name"] } }
+  ],
+  "properties": {
+    "property_postcode": { "type": "string", "title": "What is the property postcode?", "description": "The property must be in the fictional Alderwick area (AW1 to AW4).", "pattern": "^AW[1-4] [0-9][A-Z]{2}$", "x-shortLabel": "Property postcode", "x-input": "text", "x-requirementId": "REQ-AREA", "x-agentWritable": true },
+    "tenure": { "type": "string", "title": "What is your housing situation?", "description": "This grant is only for owner-occupiers, but every option is shown so the service can explain the decision.", "oneOf": [{ "const": "owner_occupier", "title": "I own the property and live there" }, { "const": "private_tenant", "title": "I rent from a private landlord" }, { "const": "social_tenant", "title": "I rent from the council or a housing association" }, { "const": "landlord", "title": "I own the property but do not live there" }], "x-shortLabel": "Housing situation", "x-input": "radio", "x-requirementId": "REQ-HOME", "x-agentWritable": true },
+    "main_home": { "type": "string", "title": "Is this property your main home?", "description": "Choose yes only if you normally live at this address.", "oneOf": [{ "const": "yes", "title": "Yes" }, { "const": "no", "title": "No" }], "x-shortLabel": "Main home", "x-input": "radio", "x-requirementId": "REQ-HOME", "x-agentWritable": true },
+    "years_at_property": { "type": "integer", "title": "How many complete years have you lived here?", "description": "Enter 0 if you moved in less than a year ago.", "minimum": 0, "maximum": 80, "x-shortLabel": "Years at property", "x-input": "number", "x-agentWritable": true },
+    "preferred_contact": { "type": "string", "title": "How should the council contact you?", "description": "No message is sent in this prototype.", "oneOf": [{ "const": "email", "title": "Email" }, { "const": "phone", "title": "Phone" }, { "const": "letter", "title": "Letter" }], "x-shortLabel": "Contact preference", "x-input": "radio", "x-agentWritable": true },
+
+    "household_size": { "type": "integer", "title": "How many people normally live in the property?", "description": "Include adults and children who use this as their main home.", "minimum": 1, "maximum": 20, "x-shortLabel": "Household size", "x-input": "number", "x-agentWritable": true },
+    "financial_route": { "type": "string", "title": "Which financial condition applies to your household?", "description": "You only need to meet one route: a listed income-related benefit or household income below £25,000 before tax.", "oneOf": [{ "const": "qualifying_benefit", "title": "Someone receives a qualifying income-related benefit" }, { "const": "income_under_25000", "title": "Annual household income is below £25,000" }, { "const": "neither", "title": "Neither applies" }, { "const": "not_sure", "title": "I am not sure" }], "x-shortLabel": "Financial route", "x-input": "radio", "x-requirementId": "REQ-INCOME", "x-agentWritable": true },
+    "benefit_type": { "type": "string", "title": "Which qualifying benefit is received?", "description": "Choose the main benefit used for this application.", "oneOf": [{ "const": "universal_credit", "title": "Universal Credit" }, { "const": "pension_credit", "title": "Pension Credit" }, { "const": "income_support", "title": "Income Support" }, { "const": "income_based_jsa", "title": "Income-based Jobseeker’s Allowance" }, { "const": "income_related_esa", "title": "Income-related Employment and Support Allowance" }, { "const": "housing_benefit", "title": "Housing Benefit" }], "x-shortLabel": "Qualifying benefit", "x-input": "select", "x-requirementId": "REQ-INCOME", "x-agentWritable": true },
+    "annual_income": { "type": "integer", "title": "What is the household’s annual income before tax?", "description": "Enter a whole-pound amount for everyone who normally lives in the home.", "minimum": 0, "maximum": 24999, "x-shortLabel": "Annual household income", "x-input": "currency", "x-requirementId": "REQ-INCOME", "x-agentWritable": true },
+    "savings_band": { "type": "string", "title": "How much does the household have in savings?", "description": "Include savings and investments, but not the home you live in.", "oneOf": [{ "const": "under_6000", "title": "Less than £6,000" }, { "const": "6000_to_15999", "title": "£6,000 to £15,999" }, { "const": "16000_or_more", "title": "£16,000 or more" }, { "const": "not_sure", "title": "I am not sure" }], "x-shortLabel": "Household savings", "x-input": "radio", "x-requirementId": "REQ-INCOME", "x-agentWritable": true },
+
+    "repair_type": { "type": "string", "title": "What is the main repair?", "description": "Choose the closest category. Follow-up questions change according to this answer.", "oneOf": [{ "const": "heating", "title": "Heating or hot water" }, { "const": "electrics", "title": "Electrical system" }, { "const": "structure", "title": "Walls, roof or structure" }, { "const": "water_ingress", "title": "Water entering the home" }, { "const": "other", "title": "Another urgent repair" }], "x-shortLabel": "Repair type", "x-input": "radio", "x-requirementId": "REQ-URGENT", "x-agentWritable": true },
+    "repair_description": { "type": "string", "title": "Describe what has happened", "description": "Say what stopped working or became unsafe, when it began, and which rooms are affected. Do not include medical details.", "minLength": 30, "maxLength": 500, "x-shortLabel": "Repair description", "x-input": "textarea", "x-requirementId": "REQ-URGENT", "x-agentWritable": true },
+    "problem_started": { "type": "string", "title": "When did the problem begin?", "description": "An approximate period is enough for this prototype.", "oneOf": [{ "const": "today", "title": "Today" }, { "const": "last_3_days", "title": "Within the last 3 days" }, { "const": "last_2_weeks", "title": "Within the last 2 weeks" }, { "const": "over_2_weeks", "title": "More than 2 weeks ago" }], "x-shortLabel": "Problem started", "x-input": "radio", "x-agentWritable": true },
+    "heating_status": { "type": "string", "title": "What heating or hot water is available now?", "description": "This question only applies to heating and hot-water repairs.", "oneOf": [{ "const": "none", "title": "No main heating or hot water" }, { "const": "partial", "title": "Some heating or hot water remains" }, { "const": "working", "title": "Both are still working" }], "x-shortLabel": "Heating status", "x-input": "radio", "x-requirementId": "REQ-URGENT", "x-agentWritable": true },
+    "electrical_risk": { "type": "string", "title": "Is there an immediate electrical warning sign?", "description": "Examples include sparks, burning smells, repeated tripping, or exposed live parts.", "oneOf": [{ "const": "yes", "title": "Yes" }, { "const": "no", "title": "No" }, { "const": "not_sure", "title": "I am not sure" }], "x-shortLabel": "Electrical warning sign", "x-input": "radio", "x-requirementId": "REQ-URGENT", "x-agentWritable": true },
+    "structural_risk": { "type": "string", "title": "Is any part of the home unsafe to use?", "description": "This question only applies to structural repairs.", "oneOf": [{ "const": "yes", "title": "Yes" }, { "const": "no", "title": "No" }, { "const": "not_sure", "title": "I am not sure" }], "x-shortLabel": "Structural safety", "x-input": "radio", "x-requirementId": "REQ-URGENT", "x-agentWritable": true },
+    "immediate_impact": { "type": "string", "title": "How is the problem affecting the home now?", "description": "Choose the most serious current effect.", "oneOf": [{ "const": "essential_service_lost", "title": "An essential service is unavailable" }, { "const": "immediate_safety_risk", "title": "There is an immediate safety risk" }, { "const": "important_room_unusable", "title": "An important room cannot be used" }, { "const": "no_immediate_impact", "title": "None of these" }], "x-shortLabel": "Immediate impact", "x-input": "radio", "x-requirementId": "REQ-URGENT", "x-agentWritable": true },
+    "temporary_measures": { "type": "string", "title": "Have you taken any temporary safety measures?", "description": "For example, switching off power at the fuse box or using another safe source of heat.", "oneOf": [{ "const": "yes", "title": "Yes" }, { "const": "no", "title": "No" }, { "const": "not_applicable", "title": "Not applicable" }], "x-shortLabel": "Temporary measures", "x-input": "radio", "x-agentWritable": true },
+
+    "estimated_cost": { "type": "integer", "title": "What is the expected repair cost?", "description": "Enter a whole amount from £250 to £7,500, including tax.", "minimum": 250, "maximum": 7500, "x-shortLabel": "Expected cost", "x-input": "currency", "x-requirementId": "REQ-COST", "x-agentWritable": true },
+    "quote_status": { "type": "string", "title": "Do you have a written contractor estimate?", "description": "The prototype records readiness only; it does not upload documents.", "oneOf": [{ "const": "estimate_ready", "title": "Yes, I have a written estimate" }, { "const": "requested", "title": "I have requested one" }, { "const": "none", "title": "No" }], "x-shortLabel": "Contractor estimate", "x-input": "radio", "x-requirementId": "REQ-EVIDENCE", "x-agentWritable": true },
+    "contractor_name": { "type": "string", "title": "What is the contractor or company name?", "description": "Enter the name shown on the written estimate.", "minLength": 2, "maxLength": 100, "x-shortLabel": "Contractor", "x-input": "text", "x-requirementId": "REQ-EVIDENCE", "x-agentWritable": true },
+    "photo_status": { "type": "string", "title": "Do you have clear photographs of the problem?", "description": "Nothing is uploaded in this prototype.", "oneOf": [{ "const": "photos_ready", "title": "Yes, clear photographs are ready" }, { "const": "cannot_take", "title": "I cannot safely take photographs" }, { "const": "none", "title": "No photographs are ready" }], "x-shortLabel": "Photographs", "x-input": "radio", "x-requirementId": "REQ-EVIDENCE", "x-agentWritable": true },
+    "ownership_evidence": { "type": "string", "title": "Do you have evidence that you own the property?", "description": "A mortgage statement or title record would be accepted in a real service. Nothing is uploaded here.", "oneOf": [{ "const": "ready", "title": "Yes" }, { "const": "need_help", "title": "No, I need help finding it" }], "x-shortLabel": "Ownership evidence", "x-input": "radio", "x-requirementId": "REQ-EVIDENCE", "x-agentWritable": true },
+    "declaration_accuracy": { "type": "string", "title": "I confirm that the answers are accurate to the best of my knowledge", "description": "Only the applicant can make this declaration. An agent cannot propose or confirm it.", "oneOf": [{ "const": "yes", "title": "I confirm" }], "x-shortLabel": "Applicant declaration", "x-input": "checkbox", "x-requirementId": "REQ-DECLARATION", "x-agentWritable": false }
+  }
+}

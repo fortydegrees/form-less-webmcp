@@ -8,16 +8,14 @@ function tool(name: string): WebMcpTool {
   return match
 }
 
-beforeEach(() => {
-  applicationStore.reset()
-})
+beforeEach(() => applicationStore.reset())
 
-describe('WebMCP tool contract', () => {
-  it('exposes six narrow tools and no submission path', () => {
+describe('generated WebMCP contract', () => {
+  it('exposes six composable tools and no submission path', () => {
     expect(webMcpTools.map((candidate) => candidate.name)).toEqual([
-      'configure_interaction',
-      'get_application_step',
-      'propose_answer',
+      'inspect_application',
+      'configure_assistance',
+      'propose_answers',
       'explain_requirement',
       'validate_application',
       'get_application_review',
@@ -25,62 +23,48 @@ describe('WebMCP tool contract', () => {
     expect(webMcpTools.some((candidate) => candidate.name.includes('submit'))).toBe(false)
   })
 
-  it('marks read tools and applicant-text outputs accurately', () => {
-    expect(tool('validate_application').annotations).toEqual({
-      readOnlyHint: true,
-      untrustedContentHint: false,
-    })
-    expect(tool('get_application_review').annotations).toEqual({
-      readOnlyHint: true,
-      untrustedContentHint: true,
-    })
-    expect(tool('propose_answer').annotations?.readOnlyHint).toBe(false)
+  it('derives the proposal question enum from agent-writable schema fields', () => {
+    const schemaText = JSON.stringify(tool('propose_answers').inputSchema)
+    expect(schemaText).toContain('repair_description')
+    expect(schemaText).not.toContain('declaration_accuracy')
   })
 
-  it('uses the same domain store for tool writes and UI reads', async () => {
-    const result = await tool('propose_answer').execute({
-      questionId: 'repair_description',
-      value: 'The boiler stopped working two days ago. There is no heating or hot water.',
+  it('lets an agent inspect structure and conditional logic without scraping the DOM', async () => {
+    const result = await tool('inspect_application').execute({})
+    expect(result).toMatchObject({
+      questions: expect.arrayContaining([
+        expect.objectContaining({ id: 'heating_status', appliesWhen: { field: 'repair_type', equals: 'heating' } }),
+      ]),
+      sections: expect.arrayContaining([expect.objectContaining({ id: 'repair' })]),
     })
-
-    expect(result).toMatchObject({ proposed: true, stored: false })
-    expect(applicationStore.getSnapshot().answers.repair_description).toBe('boiler problem')
-    expect(applicationStore.getSnapshot().pendingProposal?.value).toContain('two days ago')
-    expect(applicationStore.getSnapshot().history).toHaveLength(1)
-
-    applicationStore.confirmAgentProposal()
-    expect(applicationStore.getSnapshot().answers.repair_description).toContain('two days ago')
-    expect(applicationStore.getSnapshot().history.map((entry) => entry.actor)).toEqual(['agent', 'human'])
+    expect((result as { questions: unknown[] }).questions).toHaveLength(24)
+    expect(applicationStore.getSnapshot().history.at(-1)?.action).toBe('WebMCP · inspect_application')
   })
 
-  it('returns a bounded review payload that explicitly withholds submission', async () => {
-    const result = await tool('get_application_review').execute({})
-    const text = JSON.stringify(result)
-
-    expect(text.length).toBeLessThan(1500)
-    expect(text).toContain('availableToAgent')
-    expect(text).toContain('false')
+  it('activates the approved adaptive layout without changing an answer', async () => {
+    const result = await tool('configure_assistance').execute({ active: true, keyboardNavigation: true, plainLanguage: true })
+    expect(result).toMatchObject({ assistance: { active: true, keyboardNavigation: true, plainLanguage: true }, answersChanged: false })
+    expect(applicationStore.getSnapshot().answers).toEqual({})
   })
 
-  it('returns one directly consumable JSON value for success and domain errors', async () => {
-    const success = await tool('validate_application').execute({})
-    expect(success).toMatchObject({ valid: false, issueCount: 2 })
-
-    await tool('propose_answer').execute({
-      questionId: 'evidence_status',
-      value: 'estimate_ready',
-    })
-    const failure = await tool('propose_answer').execute({
-      questionId: 'repair_description',
-      value: 'Still vague',
-    })
-    expect(failure).toMatchObject({
-      ok: false,
-      error: { code: 'proposal_pending' },
-    })
+  it('stages multiple proposals while canonical state remains unchanged', async () => {
+    const result = await tool('propose_answers').execute({ proposals: [
+      { questionId: 'tenure', value: 'owner_occupier', rationale: 'Applicant said they own and live there.' },
+      { questionId: 'repair_type', value: 'heating' },
+    ] })
+    expect(result).toMatchObject({ proposed: 2, stored: 0 })
+    expect(applicationStore.getSnapshot().answers).toEqual({})
+    expect(applicationStore.getSnapshot().pendingProposals).toHaveLength(2)
   })
 
-  it('registers with abort signals and degrades when the API is missing', async () => {
+  it('returns directly consumable JSON for deterministic validation and domain errors', async () => {
+    const validation = await tool('validate_application').execute({})
+    expect(validation).toMatchObject({ valid: false, issueCount: expect.any(Number) })
+    const error = await tool('propose_answers').execute({ proposals: [{ questionId: 'declaration_accuracy', value: 'yes' }] })
+    expect(error).toMatchObject({ ok: false, error: { code: 'human_only_field' } })
+  })
+
+  it('registers all tools with abort signals and degrades without the API', async () => {
     const registrations: Array<{ tool: WebMcpTool; signal?: AbortSignal }> = []
     const context = new EventTarget() as ModelContextLike
     context.registerTool = async (definition, options) => {
@@ -95,7 +79,6 @@ describe('WebMCP tool contract', () => {
     expect(registrations.every((entry) => entry.signal?.aborted === false)).toBe(true)
     supported.abort()
     expect(registrations.every((entry) => entry.signal?.aborted === true)).toBe(true)
-
     expect(registerWebMcpTools({} as Document)).toEqual({ status: 'unsupported' })
   })
 })

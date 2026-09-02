@@ -1,5 +1,8 @@
 # QA and Submission Worker Packet
 
+> Historical first-slice packet. Superseded by the current
+> `docs/qa-submission-plan.md`.
+
 Status target: `ready_for_review`
 
 Own `docs/qa-submission-plan.md`. Translate the official challenge rules and
@@ -10,4 +13,3 @@ requirements, Devpost fields, and a sub-three-minute video storyboard.
 
 Do not edit application code or publish anything. Cite primary sources with
 links. Flag contradictions or uncertainties. Return assumptions and missing items.
-

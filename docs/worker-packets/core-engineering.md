@@ -1,5 +1,8 @@
 # Core Engineering Worker Packet
 
+> Historical first-slice packet. Superseded by the schema-driven architecture
+> and acceptance criteria in `PROJECT.md`.
+
 Status target: `ready_for_review`
 
 Own the application implementation. Build the first complete vertical slice
@@ -16,4 +19,3 @@ Acceptance:
 - Seeded demo journey reaches validation, correction, review, and human submit.
 - No agent-callable submit path exists.
 - Return files changed, commands/tests, assumptions, uncertainties, missing work.
-

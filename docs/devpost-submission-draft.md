@@ -50,9 +50,9 @@ human-authorised action.
 
 Project name: `[FINAL NAME]`
 
-Elevator pitch (186/200 characters):
+Elevator pitch (165/200 characters):
 
-> A public-service form that adapts around each person, letting their agent explain rules, guide one step at a time and check answers—while the website retains authority and final control.
+> Define a service once. WebMCP lets each visitor's agent negotiate a clearer personal interface—while the website keeps policy authority and the person keeps control.
 
 Built with tags:
 
@@ -74,7 +74,7 @@ App status: `New`
 
 Testing instructions:
 
-> No account or credentials are required. Open the live URL in the latest ChatGPT desktop app using GPT-5.6 Sol or Terra, or in Chrome 149+ with WebMCP testing enabled. The app starts in a deterministic demo state with two issues. Use Reset demo to restore it at any time. The normal human workflow remains available when WebMCP is unsupported.
+> No account or credentials are required. Open the live URL in the latest ChatGPT desktop app using GPT-5.6 Sol or Terra, or in Chrome 146+ with WebMCP testing enabled. The app starts as a blank standard 24-question application. Ask the agent to use the site's tools rather than browser clicks. Use Reset demo to restore it at any time. The normal human workflow remains available when WebMCP is unsupported.
 
 Agents or clients tested:
 
@@ -99,11 +99,11 @@ services. GDS also found accessibility issues on nearly all 1,203 public-sector
 websites and 21 apps it monitored from 2022 to 2024, including recurring
 keyboard, focus, contrast and reflow problems.
 
-Alderwick Home Support is a fictional urgent-repair grant service for a
-low-income homeowner dealing with lost heating or another safety-critical
-problem. It gives us a concrete way to test a broader idea: a public-service
-website can work with a visitor's chosen agent without handing policy or final
-authority to that agent.
+Alderwick Home Support is a fictional urgent-repair grant service and a concrete
+test of a broader idea: a website can define one machine-readable form contract
+and use it to serve both people and their chosen agents. The standard experience
+is a realistic 24-question application with five sections, conditional branches,
+evidence requirements and cross-field rules.
 
 Sources:
 
@@ -118,22 +118,25 @@ for its own model. WebMCP lets the open page publish a small contract to the
 visitor's existing agent instead.
 
 Here, the service defines the official questions, accepted answer shapes,
-fictional eligibility rules and validation logic. The agent can change how the
-same application is presented, request the next official step, explain a named
-requirement, help prepare an answer and run checks. It cannot change policy,
-invent evidence or submit the application.
+conditional branches, fictional eligibility rules, and approved interface
+compositions. The agent can inspect that typed contract, request a focused
+pathway, map applicant-provided facts into proposals, explain named requirements,
+and run checks. It cannot change policy, invent evidence, confirm proposals,
+make the applicant declaration, or submit.
 
 ### How it improves the experience
 
-The demo starts as a complete but dense application overview with two seeded
-problems: an ambiguous repair description and missing evidence. The visitor can
-ask their agent for keyboard-friendly, one-question-at-a-time help. The visible
-page switches to guided mode without losing answers or changing any rule.
+The demo starts as a blank, conventional council application. The visitor tells
+their external agent about the repair once. The agent reads the structured form
+model—not the DOM—and the page visibly becomes a personal pathway showing how
+many questions are relevant, which branches do not apply, what remains, and
+which evidence is needed.
 
-The agent can explain why evidence is needed in the site's own words and run
-the same deterministic checks as the human interface. Each agent action appears
-in a shared activity history. The final review shows every answer and change.
-Submission remains a human action.
+The agent can stage several structured answers at once, but the page makes the
+human review and confirm them before anything is stored. As answers are
+confirmed, conditional branches and the evidence plan recalculate. Every site
+tool call appears in a visible case trail. The final declaration and submission
+remain human actions.
 
 The site still works as an ordinary responsive, keyboard-operable form when
 WebMCP is unavailable. Agent support is an enhancement, not a new access
@@ -141,9 +144,10 @@ requirement.
 
 ### What people and agents can now do together
 
-The visitor contributes intent, corrections, consent and the final decision.
-Their agent contributes navigation, explanation, continuity and structured
-checks. The service remains the authority on questions, rules and validation.
+The visitor contributes circumstances, preferences, corrections, consent and
+the final decision. Their agent contributes context, answer mapping, explanation
+and structured checks. The service remains the authority on questions, branches,
+rules, validation, and safe UI compositions.
 
 That separation is the useful part. A person no longer has to translate a long
 official process into instructions their agent might misunderstand, and the
@@ -152,12 +156,12 @@ one live, inspectable state on the open web.
 
 ### How WebMCP was implemented
 
-The top-level page imperatively registers six tools through
+The top-level page imperatively registers six generic tools through
 `document.modelContext.registerTool`:
 
-- `configure_interaction`
-- `get_application_step`
-- `propose_answer`
+- `inspect_application`
+- `configure_assistance`
+- `propose_answers`
 - `explain_requirement`
 - `validate_application`
 - `get_application_review`
@@ -167,26 +171,30 @@ runtime validation and a concise structured result. Registration is
 feature-detected and cleaned up with an `AbortController` when the React root
 unmounts.
 
-`propose_answer` cannot write an application answer. It creates one visible
-pending proposal, and the applicant must use the page's **Confirm proposed
-answer** or **Reject** control. Confirmation validates again at the human
-decision boundary; neither control is exposed through WebMCP.
+`propose_answers` cannot write an application answer. It creates up to eight
+visible proposals, and the applicant must confirm or reject them in the page.
+The proposal schema is generated from fields marked agent-writable; the final
+declaration is deliberately excluded. Confirmation validates again at the human
+decision boundary, and no confirmation control is exposed through WebMCP.
 
-The human interface and WebMCP handlers use the same TypeScript domain model and
-external store. There is no shadow agent state, backend, model API, account or
-network dependency. Vitest covers the six-tool contract, deterministic rules,
-invalid inputs, visible changes and the missing submission capability.
+JSON Schema 2020-12 defines data types and constraints, a UI schema defines the
+five ordinary sections and approved adaptive layout, and a small rules document
+holds explainable cross-field policy. One typed adapter drives the standard UI,
+personal pathway, deterministic domain engine, and generated tool enums. There
+is no shadow agent state, backend, model API, account or network dependency.
+Vitest covers schema integrity, branching, multi-answer consent, generated tool
+schemas, deterministic rules, and the missing submission capability.
 
 ### What we learned
 
-The hard part wasn't registering tools. It was deciding where authority should
-stay. Presentation can adapt freely. Official rules cannot. Agent suggestions
-must remain visible and reversible. Consequential submission belongs to the
-person.
+The hard part was not registering tools. It was designing one contract expressive
+enough for both interfaces, then deciding where authority should stay. Approved
+presentation can adapt. Official rules cannot. Agent suggestions remain visible
+and reversible. Declaration and consequential submission belong to the person.
 
 That pattern should transfer beyond grants to benefits, permits, healthcare
-administration and other rule-heavy services: let a person's chosen agent help,
-but let the site define the safe contract.
+administration and other rule-heavy services: **define the form once; render it
+for people and expose it safely to agents.**
 
 ## Release-dependent fields
 

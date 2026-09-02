@@ -2,160 +2,128 @@
 
 Status: active competition build  
 Internal codename only: David will choose the submission name.  
-Deadline: 3 September 2026, 13:00 Pacific / 21:00 BST. Target submission: 19:00 BST.
+Deadline: 3 September 2026, 21:00 BST. Target submission: 19:00 BST.
 
-## Product Thesis
+## Product thesis
 
-Bring your own agent and interaction preferences. A WebMCP-enabled public
-service safely transforms one difficult official process into a personalised,
-understandable workflow without replacing its rules, accessible website, or
-human approval.
+**The website knows the rules. Your agent knows you. Together they produce the
+right interface.**
 
-The entry is a fictional UK-style urgent home-repair grant application for a
-low-income homeowner dealing with a safety-critical repair. The underlying
-service remains a coherent, keyboard-operable form. WebMCP adds structured,
-site-authored collaboration: the user's agent can configure the interaction,
-ask for the next official step, propose an answer for visible human confirmation,
-explain a rule, and run deterministic validation.
+Alderwick Home Support is a fictional UK-style urgent home-repair grant and a
+reference implementation of schema-driven adaptive interfaces. The service
+defines one machine-readable form contract. That contract generates the normal
+human application, conditional pathways, deterministic validation, approved
+adaptive layouts, and generic WebMCP tools.
 
-## Judge Story
+The agent is not a form-filling backdoor or arbitrary UI reskinner. It acts as a
+personal interface negotiator: it combines the website's authoritative
+structure with circumstances and interaction preferences the visitor has
+already shared. The site retains policy authority; the person retains answer
+confirmation, declaration, and submission authority.
 
-1. Open on a dense but functional application overview and form.
-2. The applicant tells their agent: “I use keyboard navigation and need this
-   explained one question at a time.”
-3. The agent discovers site-authored WebMCP tools and enables guided mode.
-4. The visible interface transforms while preserving the same application state.
-5. Agent and applicant complete a short seeded journey together.
-6. Deterministic validation flags an ambiguous repair description and a missing
-   supporting document.
-7. The applicant corrects the answer and confirms the document state.
-8. The review screen lists answers and agent-made changes.
-9. The agent cannot submit. The human presses the final Submit button.
+## Judge story
 
-## Audience and Scenario
+1. Open a complete, accessible but cognitively heavy council application: 24
+   questions, five sections, conditional branches, and evidence rules.
+2. The applicant gives their external agent one natural-language description
+   of the situation and asks it to use site tools rather than browser clicks.
+3. `inspect_application` returns typed questions, branches, constraints,
+   current state, and agent-write boundaries without DOM scraping.
+4. `configure_assistance` visibly recomposes the page into the site's approved
+   personal-pathway layout.
+5. The page reports relevant questions, excluded branches, remaining answers,
+   and evidence needs. No answer or policy has changed.
+6. `propose_answers` maps applicant-provided facts into a visible review queue.
+   Stored answers remain unchanged until the applicant confirms them.
+7. The agent retrieves official explanations and the service's deterministic
+   validation. The pathway updates as confirmed answers reveal new branches.
+8. The applicant personally makes the declaration. Review exposes one visible
+   Submit button and WebMCP exposes zero submission tools.
 
-- Applicant: a low-income homeowner in the fictional borough of Alderwick.
-- Need: urgent loss of heating, unsafe electrics, structural damage, or another
-  safety-critical home repair.
-- Functional preference: keyboard navigation and reduced cognitive load through
-  one-question-at-a-time guidance. Do not assign a diagnosis or disability.
-- Council: fictional; no real logos, policy claims, or implication of affiliation.
+## Shared form contract
 
-## Product Principles
+- `form.schema.json`: JSON Schema 2020-12 data shape, allowed values,
+  constraints, conditional applicability metadata, and agent-write boundaries.
+- `form.ui.json`: standard sections and the service-approved adaptive layout.
+- `form.rules.json`: explainable official requirements and cross-field policy.
+- `formDefinition.ts`: a typed adapter shared by renderer, domain, tests, and
+  WebMCP registration.
 
-- Human and agent share one visible, reversible state.
-- The site remains the authority on rules and validation.
-- The agent only writes answers the user has confirmed.
-- Every agent change is visible in an activity history.
-- Adaptation changes presentation, not eligibility or policy.
-- Submission is deliberately human-only.
-- The demo must be understandable without narration, then stronger with it.
+This mirrors how real schema-driven form platforms separate data schema, UI
+schema, and business rules. A service may import an existing backend schema;
+normalisation is only required where its current policy is trapped in prose,
+templates, or scattered application code.
 
-## Proposed WebMCP Tools
+## Product principles
 
-Names may change after testing, but responsibilities should remain narrow:
+- The ordinary website remains complete, accessible, and agent-optional.
+- Adaptation changes presentation and pathway visibility, never policy.
+- The UI and agent share one canonical JSON answer object.
+- Tool inputs, conditional branches, and validation derive from the same
+  machine-readable source as the visible fields.
+- Agents may inspect, adapt, explain, propose, validate, and review.
+- Agents may not confirm proposals, make the declaration, or submit.
+- Every tool call and human decision is visible in the case trail.
+- No model or external API runs inside the product.
 
-1. `configure_interaction` — switch between overview and guided presentation,
-   record keyboard/reduced-motion/plain-language preferences, and visibly apply them.
-2. `get_application_step` — return the next incomplete official question plus
-   allowed answer shape and relevant requirement identifiers.
-3. `propose_answer` — stage one schema-valid answer without changing the
-   application; the applicant must visibly confirm or reject it in the page.
-4. `explain_requirement` — return the official requirement, a plain-language
-   explanation, and what evidence is accepted.
-5. `validate_application` — run deterministic eligibility/completeness checks
-   and return actionable issues.
-6. `get_application_review` — return the complete review and explicitly state
-   that final submission requires the human UI.
+## WebMCP tools
 
-There is no `submit_application` tool.
+1. `inspect_application`
+2. `configure_assistance`
+3. `propose_answers`
+4. `explain_requirement`
+5. `validate_application`
+6. `get_application_review`
 
-## Seeded Demo Data
-
-The demo journey should include:
-
-- Alderwick postcode and owner-occupier status.
-- A qualifying low-income/benefit condition.
-- Heating failure described too vaguely at first (“boiler problem”).
-- A safety/urgency follow-up requiring a clearer answer.
-- A contractor estimate or photo/document initially missing.
-- A successful review after correction.
-
-Keep the complete journey short enough to demonstrate in under two minutes.
+There is deliberately no `submit_application` tool.
 
 ## Scope
 
-### Must Ship
+### Must ship
 
-- Responsive, polished public-service UI.
-- Overview and one-question-at-a-time guided modes.
-- Deterministic state, rules, validation, and review.
-- WebMCP registration with feature detection and a useful unsupported-browser note.
-- Visible agent activity/history and reversible preference change.
-- Human-only final submit with a clearly fictional success state.
-- Seed/reset control for reliable demos.
-- Automated domain tests, production build, and manual WebMCP test instructions.
-- Static deployment, public repository, MIT licence, README, screenshots, and
-  a narrated YouTube demo under three minutes.
+- Responsive standard and adaptive experiences generated from one contract.
+- 20+ realistic fields, meaningful conditional branches, and cross-field rules.
+- Deterministic state, validation, review, reset, and fictional success screen.
+- Visible multi-answer proposals with individual and reviewed-batch human
+  confirmation.
+- Browser-native WebMCP registration with useful unsupported-browser fallback.
+- Keyboard focus choreography, semantic controls, error associations, live
+  announcements, reduced-motion support, and 320px+ reflow.
+- Public static deployment, repository, MIT licence, README, screenshots, and a
+  narrated YouTube demo under three minutes.
 
-### Explicitly Out of Scope
+### Out of scope
 
-- Accounts, authentication, database, payments, uploads, email, real submissions.
-- Real council integration or real eligibility advice.
-- Multiple civic workflows, generic SDK/platform, analytics, internationalisation.
+- Accounts, authentication, databases, payments, uploads, email, and real
+  council submission.
+- Real policy or eligibility advice.
+- Arbitrary third-party page rewriting or an embedded chatbot.
 - LLM/API calls inside the product.
-- Accessibility/compliance certification claims.
+- Accessibility certification claims.
 
-## Acceptance Criteria
+## Acceptance criteria
 
-- App builds with `pnpm build` and runs with documented commands.
-- Tool schemas and descriptions are narrow enough for correct agent selection.
-- Unsupported browsers still provide the normal human application.
-- State updates made through tools immediately appear in the UI.
-- Invalid inputs do not corrupt application state.
-- Validation deterministically produces and then clears the seeded issues.
-- Keyboard-only completion is possible; focus remains logical after mode changes.
-- Dynamic changes have an `aria-live` announcement and motion respects user preference.
-- No agent path can trigger final submission.
-- Demo reset restores the exact initial state.
+- `pnpm test`, `pnpm lint`, and `pnpm build` pass.
+- The standard form works without WebMCP.
+- Chrome/ChatGPT discovers exactly six tools and no submission tool.
+- `inspect_application` exposes all fields and branches from the contract.
+- `configure_assistance` causes a visible transformation without changing an
+  answer.
+- Multi-answer proposals remain unstored until a visible human action.
+- Conditional answers recalculate the personal pathway.
+- Deterministic validation catches and clears schema and cross-field issues.
+- The applicant declaration is absent from the agent-writable tool enum.
+- Review reports `availableToAgent: false`; only the human UI can submit.
+- True 390px layout has no horizontal overflow.
 
-## Submission Narrative
+## Competition position
 
-The description and video must answer:
+The primary WebMCP claim is not that an agent can eventually operate a web form;
+computer use already approximates that. The claim is that a cooperating site can
+make the task dramatically more legible and reliable by exposing authoritative
+structure, state, constraints, branches, and approved UI compositions directly.
 
-- Why this use case is a strong fit for WebMCP.
-- How it creates a better user experience.
-- What people and agents can do together that was difficult or impossible before.
-- How WebMCP was implemented.
-
-Judge criteria are equally weighted: WebMCP leverage, execution, potential
-impact, and creativity/ambition. Optimise the product and evidence for all four.
-
-## Judging Position
-
-Stage One should be a clear pass: the product fits the human-agent open-web
-theme and its six tools are a substantive WebMCP implementation rather than DOM
-automation. The Stage Two thesis is **a site-controlled collaboration protocol
-that adapts presentation while preserving policy authority, auditability, and
-human consent**—not merely an agent filling in a council form.
-
-Current risk is uneven evidence, not the concept. WebMCP leverage and execution
-are strongest; the public demo and submission must make impact and ambition
-equally concrete. The highest-value product refinement is to replace the
-agent-supplied `confirmed: true` assertion with a visible pending proposal that
-the applicant must confirm in the human interface before the answer is stored.
-
-## Impact Evidence
-
-Use these facts narrowly; neither source measures form abandonment or proves
-that WebMCP alone solves digital exclusion.
-
-- The UK government's 2025 Digital Inclusion Action Plan reports that around
-  23% of the UK population may struggle to interact with online services. The
-  government page cites Lloyds data, so it is an official secondary source:
-  https://www.gov.uk/government/publications/digital-inclusion-action-plan-first-steps/digital-inclusion-action-plan-first-steps
-- GDS's 2022–24 monitoring found accessibility issues on nearly all 1,203
-  public-sector websites and 21 apps tested, with recurring barriers including
-  keyboard operation, visible focus, reflow, and contrast. This is a monitored
-  sample, not a population prevalence estimate:
-  https://www.gov.uk/government/publications/accessibility-monitoring-of-public-sector-websites-and-mobile-apps-from-2022-to-2024/accessibility-monitoring-of-public-sector-websites-and-mobile-apps-from-2022-to-2024
+The counterfactual matters: without WebMCP, an agent must scrape guidance, infer
+field relationships, track conditional DOM changes, and guess side effects.
+With WebMCP, it composes narrow site-authored capabilities against typed state,
+while the person and service retain their proper authority.

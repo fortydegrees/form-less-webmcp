@@ -3,10 +3,9 @@ import {
   DomainError,
   explainRequirement,
   getApplicationReview,
-  getApplicationStep,
-  validateApplication,
-  type InteractionPreferences,
-  type PresentationMode,
+  questions,
+  requirements,
+  type AssistanceState,
 } from './domain'
 
 interface ToolAnnotations {
@@ -24,10 +23,7 @@ export interface WebMcpTool {
 }
 
 export interface ModelContextLike extends EventTarget {
-  registerTool(
-    tool: WebMcpTool,
-    options?: { signal?: AbortSignal },
-  ): Promise<undefined>
+  registerTool(tool: WebMcpTool, options?: { signal?: AbortSignal }): Promise<undefined>
 }
 
 declare global {
@@ -36,134 +32,102 @@ declare global {
   }
 }
 
-function success(data: unknown): unknown {
-  return data
-}
-
 async function safely(run: () => unknown): Promise<unknown> {
   try {
-    return success(run())
+    return run()
   } catch (error) {
     if (error instanceof DomainError) {
-      return {
-        ok: false,
-        error: { code: error.code, message: error.message },
-      }
+      return { ok: false, error: { code: error.code, message: error.message } }
     }
     throw error
   }
 }
 
+const agentWritableQuestionIds = questions
+  .filter((question) => question.agentWritable)
+  .map((question) => question.id)
+const requirementIds = Object.keys(requirements)
+
 export const webMcpTools: readonly WebMcpTool[] = [
   {
-    name: 'configure_interaction',
-    title: 'Configure application interaction',
+    name: 'inspect_application',
+    title: 'Inspect the application contract',
     description:
-      'Changes only the visible presentation and interaction preferences for this grant application. It never changes policy, eligibility, answers, or submission state.',
+      'Returns the site-authored form structure, answer types, conditional branches, allowed values, current answers, and personal pathway. Use this instead of scraping the page or guessing field relationships.',
+    inputSchema: { type: 'object', properties: {}, additionalProperties: false },
+    annotations: { readOnlyHint: true, untrustedContentHint: true },
+    async execute() {
+      return safely(() => {
+        const result = applicationStore.inspect()
+        applicationStore.recordAgentTool('inspect_application', `The agent inspected ${result.questions.length} structured questions across ${result.sections.length} sections.`)
+        return result
+      })
+    },
+  },
+  {
+    name: 'configure_assistance',
+    title: 'Configure a personal application pathway',
+    description:
+      'Activates the service’s approved focused layout and presentation preferences. This changes only the interface; it never changes answers, policy, eligibility, or submission state.',
     inputSchema: {
       type: 'object',
       properties: {
-        mode: {
-          type: 'string',
-          enum: ['overview', 'guided'],
-          description: 'Overview shows every question; guided shows one official question at a time.',
-        },
-        keyboardNavigation: {
-          type: 'boolean',
-          description: 'Show keyboard-specific interaction guidance.',
-        },
-        reducedMotion: {
-          type: 'boolean',
-          description: 'Disable non-essential interface motion.',
-        },
-        plainLanguage: {
-          type: 'boolean',
-          description: 'Prefer concise plain-language requirement explanations.',
-        },
+        active: { type: 'boolean', description: 'Use the approved focused pathway instead of the standard multi-section form.' },
+        keyboardNavigation: { type: 'boolean', description: 'Show keyboard-specific navigation guidance.' },
+        reducedMotion: { type: 'boolean', description: 'Disable non-essential interface motion.' },
+        plainLanguage: { type: 'boolean', description: 'Show concise site-authored explanations beside relevant questions.' },
       },
       additionalProperties: false,
     },
     annotations: { readOnlyHint: false, untrustedContentHint: false },
     async execute(input) {
       return safely(() => {
-        const state = applicationStore.configure(
-          input as Partial<InteractionPreferences> & { mode?: PresentationMode },
-          'agent',
-        )
-        return { mode: state.mode, preferences: state.preferences }
-      })
-    },
-  },
-  {
-    name: 'get_application_step',
-    title: 'Get the next application step',
-    description:
-      'Returns the next incomplete or invalid official question, its allowed answer shape, and its requirement identifier. It does not change the application.',
-    inputSchema: { type: 'object', properties: {}, additionalProperties: false },
-    annotations: { readOnlyHint: true, untrustedContentHint: true },
-    async execute() {
-      return safely(() => {
-        const step = getApplicationStep(applicationStore.getSnapshot())
-        if (!step) return { complete: true, nextStep: null }
+        const state = applicationStore.configure(input as Partial<AssistanceState>, 'agent')
         return {
-          complete: false,
-          nextStep: {
-            questionId: step.question.id,
-            question: step.question.label,
-            hint: step.question.hint,
-            input: step.question.input,
-            allowedValues: step.question.options ?? null,
-            requirementId: step.question.requirementId,
-            currentValue: step.currentValue,
-            reason: step.reason,
-            issue: step.issue,
-          },
+          assistance: state.assistance,
+          pathway: applicationStore.inspect().pathway,
+          answersChanged: false,
         }
       })
     },
   },
   {
-    name: 'propose_answer',
-    title: 'Propose one application answer',
+    name: 'propose_answers',
+    title: 'Propose structured application answers',
     description:
-      'Creates one visible answer proposal for the applicant to confirm or reject in the page. It never changes a stored answer; only the applicant can confirm a proposal in the human interface.',
+      'Maps information the applicant supplied into up to eight schema-valid proposals. Proposals are displayed for individual human confirmation and never alter stored answers by themselves. The applicant declaration is unavailable to agents.',
     inputSchema: {
       type: 'object',
       properties: {
-        questionId: {
-          type: 'string',
-          enum: [
-            'property_postcode',
-            'owner_occupier',
-            'financial_criterion',
-            'repair_type',
-            'repair_description',
-            'urgent_impact',
-            'estimated_cost',
-            'evidence_status',
-          ],
-        },
-        value: {
-          description: 'The exact answer to show the applicant; estimated_cost is a whole number.',
-          oneOf: [{ type: 'string' }, { type: 'number' }],
+        proposals: {
+          type: 'array',
+          minItems: 1,
+          maxItems: 8,
+          items: {
+            type: 'object',
+            properties: {
+              questionId: { type: 'string', enum: agentWritableQuestionIds },
+              value: { oneOf: [{ type: 'string' }, { type: 'number' }] },
+              rationale: { type: 'string', maxLength: 180, description: 'Briefly state which applicant-provided fact supports this proposal.' },
+            },
+            required: ['questionId', 'value'],
+            additionalProperties: false,
+          },
         },
       },
-      required: ['questionId', 'value'],
+      required: ['proposals'],
       additionalProperties: false,
     },
     annotations: { readOnlyHint: false, untrustedContentHint: true },
     async execute(input) {
       return safely(() => {
-        const state = applicationStore.proposeAgentAnswer({
-          questionId: String(input.questionId ?? ''),
-          value: input.value,
-        })
+        const proposals = Array.isArray(input.proposals) ? input.proposals : []
+        const state = applicationStore.proposeAgentAnswers(proposals as Array<{ questionId: string; value: unknown; rationale?: unknown }>)
         return {
-          proposed: true,
-          stored: false,
-          questionId: input.questionId,
-          proposedValue: state.pendingProposal?.value,
-          instruction: 'The applicant must use Confirm proposed answer or Reject in the visible page.',
+          proposed: state.pendingProposals.length,
+          stored: 0,
+          proposalQuestionIds: state.pendingProposals.map((proposal) => proposal.questionId),
+          instruction: 'The applicant must confirm or reject every proposal in the visible page.',
         }
       })
     },
@@ -172,33 +136,32 @@ export const webMcpTools: readonly WebMcpTool[] = [
     name: 'explain_requirement',
     title: 'Explain an official requirement',
     description:
-      'Returns the site-authored rule, plain-language explanation, and accepted evidence for one named requirement. It does not make an eligibility decision.',
+      'Returns the service-authored rule, plain-language explanation, and accepted evidence for one requirement. It does not invent policy or decide eligibility.',
     inputSchema: {
       type: 'object',
-      properties: {
-        requirementId: {
-          type: 'string',
-          enum: ['REQ-AREA', 'REQ-HOME', 'REQ-INCOME', 'REQ-URGENT', 'REQ-COST', 'REQ-EVIDENCE'],
-        },
-      },
+      properties: { requirementId: { type: 'string', enum: requirementIds } },
       required: ['requirementId'],
       additionalProperties: false,
     },
     annotations: { readOnlyHint: true, untrustedContentHint: false },
     async execute(input) {
-      return safely(() => explainRequirement(String(input.requirementId ?? '')))
+      return safely(() => {
+        const result = explainRequirement(String(input.requirementId ?? ''))
+        applicationStore.recordAgentTool('explain_requirement', `The agent retrieved the site-authored “${result.title}” rule.`)
+        return result
+      })
     },
   },
   {
     name: 'validate_application',
-    title: 'Validate the application',
+    title: 'Run official application checks',
     description:
-      'Runs the service’s deterministic eligibility and completeness checks and returns every actionable issue. It does not submit or change answers.',
+      'Runs deterministic validation generated from the form schema and service rules. It returns every actionable issue without changing answers or submitting.',
     inputSchema: { type: 'object', properties: {}, additionalProperties: false },
     annotations: { readOnlyHint: true, untrustedContentHint: false },
     async execute() {
       return safely(() => {
-        const issues = validateApplication(applicationStore.getSnapshot())
+        const issues = applicationStore.runValidation('agent')
         return { valid: issues.length === 0, issueCount: issues.length, issues }
       })
     },
@@ -207,12 +170,13 @@ export const webMcpTools: readonly WebMcpTool[] = [
     name: 'get_application_review',
     title: 'Get the application review',
     description:
-      'Returns all current answers, validation issues, and visible agent changes. It cannot submit; final submission requires the applicant to use the human interface.',
+      'Returns the current relevant answers, pathway, validation issues, and authority boundary. It cannot submit; final submission exists only in the human interface.',
     inputSchema: { type: 'object', properties: {}, additionalProperties: false },
     annotations: { readOnlyHint: true, untrustedContentHint: true },
     async execute() {
       return safely(() => {
         const review = getApplicationReview(applicationStore.getSnapshot())
+        applicationStore.recordAgentTool('get_application_review', `The agent reviewed ${review.answers.length} relevant answers. Submission remains human-only.`)
         return {
           ...review,
           agentChanges: review.agentChanges.map(({ action, detail }) => ({ action, detail })),
@@ -226,18 +190,9 @@ export function registerWebMcpTools(
   documentObject: Document = document,
 ): { status: 'unsupported' } | { status: 'registering'; abort: () => void; ready: Promise<void> } {
   const context = documentObject.modelContext
-  if (!context || typeof context.registerTool !== 'function') {
-    return { status: 'unsupported' }
-  }
+  if (!context || typeof context.registerTool !== 'function') return { status: 'unsupported' }
 
   const controller = new AbortController()
-  const ready = Promise.all(
-    webMcpTools.map((tool) => context.registerTool(tool, { signal: controller.signal })),
-  ).then(() => undefined)
-
-  return {
-    status: 'registering',
-    abort: () => controller.abort(),
-    ready,
-  }
+  const ready = Promise.all(webMcpTools.map((tool) => context.registerTool(tool, { signal: controller.signal }))).then(() => undefined)
+  return { status: 'registering', abort: () => controller.abort(), ready }
 }

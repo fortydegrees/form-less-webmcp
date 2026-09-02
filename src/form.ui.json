@@ -1,0 +1,16 @@
+{
+  "type": "Categorization",
+  "sections": [
+    { "id": "property", "title": "Property and contact", "description": "Where the repair is needed and how the council should contact you.", "questions": ["property_postcode", "tenure", "main_home", "years_at_property", "preferred_contact"] },
+    { "id": "household", "title": "Household and finances", "description": "The financial route used to assess this fictional grant.", "questions": ["household_size", "financial_route", "benefit_type", "annual_income", "savings_band"] },
+    { "id": "repair", "title": "The urgent repair", "description": "What happened, when it began, and the immediate effect on the home.", "questions": ["repair_type", "repair_description", "problem_started", "heating_status", "electrical_risk", "structural_risk", "immediate_impact", "temporary_measures"] },
+    { "id": "cost_evidence", "title": "Cost and supporting evidence", "description": "What the repair may cost and which documents are ready.", "questions": ["estimated_cost", "quote_status", "contractor_name", "photo_status", "ownership_evidence"] },
+    { "id": "declaration", "title": "Declaration", "description": "A final statement that only the applicant can make.", "questions": ["declaration_accuracy"] }
+  ],
+  "assisted": {
+    "layout": "focused-pathway",
+    "showOneQuestion": true,
+    "showWhyAsked": true,
+    "hideInapplicable": true
+  }
+}
