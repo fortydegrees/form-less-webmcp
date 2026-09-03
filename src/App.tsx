@@ -512,8 +512,8 @@ function EvidencePlan() {
 
 function ActivityTrail() {
   const history = applicationStore.getSnapshot().history
-  const confirmations = history.filter((entry) => entry.action === 'Agent answer confirmed')
-  const otherEntries = history.filter((entry) => entry.action !== 'Agent answer confirmed')
+  const confirmations = history.filter((entry) => entry.action === 'You confirmed an agent proposal')
+  const otherEntries = history.filter((entry) => entry.action !== 'You confirmed an agent proposal')
   const displayEntries = confirmations.length > 1
     ? [...otherEntries, {
         id: confirmations.at(-1)?.id ?? 0,
