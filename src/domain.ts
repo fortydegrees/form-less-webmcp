@@ -88,6 +88,7 @@ export interface PathwaySummary {
   totalQuestions: number
   relevantQuestionIds: readonly QuestionId[]
   notApplicableQuestionIds: readonly QuestionId[]
+  undecidedQuestionIds: readonly QuestionId[]
   answeredRelevant: number
   remainingRelevant: number
   documentsNeeded: readonly string[]
@@ -125,10 +126,8 @@ export class DomainError extends Error {
 export const completedDemoAnswers: Partial<Record<QuestionId, AnswerValue>> = {
   property_postcode: 'AW2 4LA',
   tenure: 'owner_occupier',
-  main_home: 'yes',
-  years_at_property: 6,
-  preferred_contact: 'email',
-  household_size: 2,
+  ownership_type: 'sole',
+  ownership_evidence: 'ready',
   financial_route: 'qualifying_benefit',
   benefit_type: 'universal_credit',
   savings_band: 'under_6000',
@@ -136,24 +135,24 @@ export const completedDemoAnswers: Partial<Record<QuestionId, AnswerValue>> = {
   repair_description: 'The boiler stopped working two days ago. There is no heating or hot water.',
   problem_started: 'last_3_days',
   heating_status: 'none',
-  immediate_impact: 'essential_service_lost',
-  temporary_measures: 'yes',
+  temporary_heating: 'yes',
   estimated_cost: 2450,
-  quote_status: 'estimate_ready',
+  evidence_route: 'written_estimate',
   contractor_name: 'Alderwick Heating Services',
-  photo_status: 'none',
-  ownership_evidence: 'ready',
   declaration_accuracy: 'yes',
 }
 
 export const demoAgentProposals: readonly PendingAnswerProposal[] = [
   { questionId: 'property_postcode', value: 'AW2 4LA', rationale: 'You said the repair is at your Alderwick home.' },
   { questionId: 'tenure', value: 'owner_occupier', rationale: 'You said you own and live in the property.' },
-  { questionId: 'main_home', value: 'yes', rationale: 'You described it as your home.' },
   { questionId: 'financial_route', value: 'qualifying_benefit', rationale: 'You said you receive Universal Credit.' },
   { questionId: 'benefit_type', value: 'universal_credit', rationale: 'This is the benefit you named.' },
   { questionId: 'repair_type', value: 'heating', rationale: 'The reported problem is a failed boiler.' },
+  { questionId: 'repair_description', value: 'The boiler stopped working two days ago. There is no heating or hot water.', rationale: 'This uses only the repair details you supplied.' },
+  { questionId: 'problem_started', value: 'last_3_days', rationale: 'You said the boiler failed two days ago.' },
+  { questionId: 'heating_status', value: 'none', rationale: 'You said there is no heating or hot water.' },
   { questionId: 'estimated_cost', value: 2450, rationale: 'You said the written estimate is £2,450.' },
+  { questionId: 'evidence_route', value: 'written_estimate', rationale: 'You said a written estimate is ready and no photographs are available.' },
 ]
 
 export function createInitialState(): ApplicationState {
@@ -233,7 +232,7 @@ export function proposeAnswers(
   state: ApplicationState,
   inputs: readonly { questionId: string; value: unknown; rationale?: unknown }[],
 ): ApplicationState {
-  if (inputs.length === 0 || inputs.length > 8) throw new DomainError('invalid_proposals', 'Propose between 1 and 8 answers at a time.')
+  if (inputs.length === 0 || inputs.length > 10) throw new DomainError('invalid_proposals', 'Propose between 1 and 10 answers at a time.')
   if (state.pendingProposals.length > 0) throw new DomainError('proposal_pending', 'The applicant must review the current proposals before more are added.')
 
   const seen = new Set<QuestionId>()
@@ -293,27 +292,61 @@ export function isQuestionApplicable(
   question: QuestionDefinition,
   answers: Partial<Record<QuestionId, AnswerValue>>,
 ): boolean {
-  if (!question.appliesWhen) return true
-  return answers[question.appliesWhen.field] === question.appliesWhen.equals
+  return getQuestionApplicability(question, answers) === 'applicable'
+}
+
+export type QuestionApplicability = 'applicable' | 'not-applicable' | 'undecided'
+
+export function getQuestionApplicability(
+  question: QuestionDefinition,
+  answers: Partial<Record<QuestionId, AnswerValue>>,
+  visiting = new Set<QuestionId>(),
+): QuestionApplicability {
+  if (!question.appliesWhen) return 'applicable'
+  if (visiting.has(question.id)) throw new DomainError('circular_condition', `Circular condition detected for ${question.shortLabel}.`)
+
+  const nextVisiting = new Set(visiting)
+  nextVisiting.add(question.id)
+  const controller = getQuestion(question.appliesWhen.field)
+  const controllerStatus = getQuestionApplicability(controller, answers, nextVisiting)
+  if (controllerStatus === 'not-applicable') return 'not-applicable'
+
+  const controllerValue = answers[question.appliesWhen.field]
+  if (!hasAnswer(controllerValue)) return 'undecided'
+  const matches = 'equals' in question.appliesWhen
+    ? controllerValue === question.appliesWhen.equals
+    : question.appliesWhen.in.includes(String(controllerValue))
+  return matches ? 'applicable' : 'not-applicable'
 }
 
 export function getPathway(state: ApplicationState): PathwaySummary {
-  const relevant = questions.filter((question) => isQuestionApplicable(question, state.answers))
+  const statuses = new Map(questions.map((question) => [question.id, getQuestionApplicability(question, state.answers)]))
+  const relevant = questions.filter((question) => statuses.get(question.id) === 'applicable')
   const relevantIds = relevant.map((question) => question.id)
-  const notApplicableIds = questionIds.filter((id) => !relevantIds.includes(id))
+  const notApplicableIds = questionIds.filter((id) => statuses.get(id) === 'not-applicable')
+  const undecidedIds = questionIds.filter((id) => statuses.get(id) === 'undecided')
   const answeredRelevant = relevant.filter((question) => hasAnswer(state.answers[question.id])).length
   const currentQuestion = relevant.find((question) => !hasAnswer(state.answers[question.id])) ?? getApplicationStep(state)?.question
   const currentSection = currentQuestion
     ? sections.find((section) => section.questions.includes(currentQuestion.id))?.title ?? null
     : null
   const documentsNeeded: string[] = []
-  if (state.answers.quote_status !== 'estimate_ready' && state.answers.photo_status !== 'photos_ready') documentsNeeded.push('written estimate or clear photographs')
-  if (state.answers.ownership_evidence !== 'ready') documentsNeeded.push('proof of ownership')
+  if (!['written_estimate', 'photographs', 'both'].includes(String(state.answers.evidence_route ?? ''))) {
+    documentsNeeded.push('written estimate or clear photographs')
+  }
+  if (state.answers.tenure === 'owner_occupier' && state.answers.ownership_evidence !== 'ready') {
+    documentsNeeded.push('proof of ownership')
+  }
+  if (state.answers.financial_route === 'qualifying_benefit') documentsNeeded.push('current benefit award notice')
+  if (state.answers.financial_route === 'income_under_25000' && state.answers.income_evidence !== 'ready') {
+    documentsNeeded.push('recent household income evidence')
+  }
 
   return {
     totalQuestions: questions.length,
     relevantQuestionIds: relevantIds,
     notApplicableQuestionIds: notApplicableIds,
+    undecidedQuestionIds: undecidedIds,
     answeredRelevant,
     remainingRelevant: relevant.length - answeredRelevant,
     documentsNeeded,
@@ -387,11 +420,13 @@ export function validateApplication(state: ApplicationState): readonly Validatio
   }
 
   for (const rule of validationRules) {
+    if (!isQuestionApplicable(getQuestion(rule.field), state.answers)) continue
     if (rule.kind === 'disallow' && rule.values.includes(String(state.answers[rule.field] ?? ''))) {
       issues.push(issue(rule.code, rule.field, rule.requirementId, rule.severity, rule.message))
     }
     if (
       rule.kind === 'requiresAny'
+      && isQuestionApplicable(getQuestion(rule.orField), state.answers)
       && hasAnswer(state.answers[rule.field])
       && hasAnswer(state.answers[rule.orField])
       && state.answers[rule.field] !== rule.equals

@@ -71,9 +71,10 @@
 .standard-intro h2, .pathway-header h2 { margin: 0 0 8px; color: var(--midnight); font-size: clamp(1.8rem, 3vw, 2.7rem); font-weight: 760; line-height: 1.08; letter-spacing: -.03em; text-wrap: balance; }
 .standard-intro p { max-width: 670px; margin: 0; color: var(--muted); line-height: 1.55; }
 .completion { min-width: 150px; padding-left: 26px; border-left: 1px solid var(--line-strong); }
-.completion strong, .completion span { display: block; }
+.completion strong, .completion span, .completion small { display: block; }
 .completion strong { color: var(--service); font-size: 1.9rem; font-weight: 760; font-variant-numeric: tabular-nums; }
 .completion span { max-width: 110px; color: var(--muted); font-size: .76rem; line-height: 1.35; }
+.completion small { max-width: 140px; margin-top: 7px; color: var(--muted); font-size: .67rem; line-height: 1.4; }
 .standard-grid { display: grid; grid-template-columns: 240px minmax(0, 1fr); background: white; box-shadow: var(--shadow-sm); }
 .section-nav { padding: 30px 24px; border-right: 1px solid var(--line); background: #f4f7f8; }
 .section-nav > p { margin: 0 0 13px; color: var(--muted); font-size: .76rem; font-weight: 720; }
@@ -142,12 +143,13 @@
 .pathway-header .eyebrow { color: #d3ddfb; }
 .pathway-header h2 { max-width: 680px; color: white; font-size: clamp(2rem, 4vw, 3.4rem); }
 .pathway-header p { max-width: 680px; margin: 0; color: #e0e7fa; line-height: 1.58; }
-.pathway-metrics { display: grid; grid-template-columns: 1.25fr 1fr 1fr 1.25fr; border-bottom: 1px solid #b6c3e0; background: white; }
+.pathway-metrics { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border-bottom: 1px solid #b6c3e0; background: white; }
 .pathway-metrics > div { padding: 21px 25px; }
 .pathway-metrics > div + div { border-left: 1px solid var(--line); }
 .pathway-metrics strong, .pathway-metrics span { display: block; }
 .pathway-metrics strong { color: var(--agent-dark); font-size: 1.85rem; font-weight: 760; font-variant-numeric: tabular-nums; }
 .pathway-metrics span { color: var(--muted); font-size: .74rem; font-weight: 630; }
+.route-note { margin: 0; padding: 12px 24px; border-bottom: 1px solid #b6c3e0; color: #34466e; background: #f5f7fe; font-size: .76rem; line-height: 1.45; }
 .assisted-grid { display: grid; grid-template-columns: minmax(0, 1fr) 310px; gap: 1px; background: #c4cee4; }
 .focus-workspace { min-width: 0; padding: 28px; background: #edf1fa; }
 .focus-card { min-height: 520px; padding: 36px 40px 42px; background: white; box-shadow: var(--shadow-sm); }
@@ -264,8 +266,10 @@
   .form-actions { align-items: flex-start; flex-direction: column; }
   .pathway-header { padding: 28px 22px; }
   .pathway-metrics { grid-template-columns: repeat(2, 1fr); }
-  .pathway-metrics > div:nth-child(3) { border-top: 1px solid var(--line); border-left: 0; }
-  .pathway-metrics > div:nth-child(4) { border-top: 1px solid var(--line); }
+  .pathway-metrics > div:nth-child(n+3) { border-top: 1px solid var(--line); }
+  .pathway-metrics > div:nth-child(odd) { border-left: 0; }
+  .pathway-metrics > div:last-child { grid-column: 1 / -1; }
+  .route-note { padding-inline: 18px; }
   .focus-workspace { padding: 16px; }
   .focus-card { min-height: 0; padding: 26px 20px 32px; }
   .focus-card__meta { align-items: flex-start; flex-direction: column; gap: 5px; }

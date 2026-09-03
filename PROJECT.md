@@ -36,16 +36,18 @@ confirmation, declaration, and submission authority.
 
 ## Judge story
 
-1. Open a complete, accessible but cognitively heavy council application: 24
-   questions, five sections, conditional branches, and evidence rules.
+1. Open a complete, accessible but cognitively heavy council application: 34
+   possible questions, five sections, nested conditional branches, and evidence
+   rules.
 2. The applicant gives their external agent one natural-language description
    of the situation and asks it to use site tools rather than browser clicks.
 3. `inspect_application` returns typed questions, branches, constraints,
    current state, and agent-write boundaries without DOM scraping.
 4. `configure_assistance` visibly recomposes the page into the site's approved
    personal-pathway layout.
-5. The page reports relevant questions, excluded branches, remaining answers,
-   and evidence needs. No answer or policy has changed.
+5. The page distinguishes questions on the route, questions confirmed as not
+   needed, and possible follow-ups still waiting on a human answer. No answer or
+   policy has changed.
 6. `propose_answers` maps applicant-provided facts into a visible review queue.
    Stored answers remain unchanged until the applicant confirms them.
 7. The agent retrieves official explanations and the service's deterministic
@@ -95,7 +97,9 @@ There is deliberately no `submit_application` tool.
 ### Must ship
 
 - Responsive standard and adaptive experiences generated from one contract.
-- 20+ realistic fields, meaningful conditional branches, and cross-field rules.
+- 34 realistic fields, nested conditional branches, and cross-field rules. The
+  canonical boiler case resolves to 16 questions once every route choice is
+  confirmed.
 - Deterministic state, validation, review, reset, and fictional success screen.
 - Visible multi-answer proposals with individual and reviewed-batch human
   confirmation.

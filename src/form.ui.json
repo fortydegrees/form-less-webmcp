@@ -1,11 +1,73 @@
 {
   "type": "Categorization",
   "sections": [
-    { "id": "property", "title": "Property and contact", "description": "Where the repair is needed and how the council should contact you.", "questions": ["property_postcode", "tenure", "main_home", "years_at_property", "preferred_contact"] },
-    { "id": "household", "title": "Household and finances", "description": "The financial route used to assess this fictional grant.", "questions": ["household_size", "financial_route", "benefit_type", "annual_income", "savings_band"] },
-    { "id": "repair", "title": "The urgent repair", "description": "What happened, when it began, and the immediate effect on the home.", "questions": ["repair_type", "repair_description", "problem_started", "heating_status", "electrical_risk", "structural_risk", "immediate_impact", "temporary_measures"] },
-    { "id": "cost_evidence", "title": "Cost and supporting evidence", "description": "What the repair may cost and which documents are ready.", "questions": ["estimated_cost", "quote_status", "contractor_name", "photo_status", "ownership_evidence"] },
-    { "id": "declaration", "title": "Declaration", "description": "A final statement that only the applicant can make.", "questions": ["declaration_accuracy"] }
+    {
+      "id": "property",
+      "title": "Property and ownership",
+      "description": "Where the repair is needed and which ownership rules apply.",
+      "questions": [
+        "property_postcode",
+        "tenure",
+        "ownership_type",
+        "joint_owner_consent",
+        "freeholder_permission",
+        "ownership_evidence"
+      ]
+    },
+    {
+      "id": "finances",
+      "title": "Household finances",
+      "description": "Only one financial assessment route needs to be completed.",
+      "questions": [
+        "financial_route",
+        "benefit_type",
+        "annual_income",
+        "savings_band",
+        "income_evidence",
+        "finance_help_needed"
+      ]
+    },
+    {
+      "id": "repair",
+      "title": "The urgent repair",
+      "description": "Each repair type has its own safety and impact questions.",
+      "questions": [
+        "repair_type",
+        "repair_description",
+        "problem_started",
+        "heating_status",
+        "temporary_heating",
+        "electrical_risk",
+        "power_isolated",
+        "affected_circuits",
+        "structural_risk",
+        "affected_structure",
+        "temporary_support",
+        "water_source",
+        "water_stopped",
+        "rooms_affected",
+        "other_urgency",
+        "temporary_measures"
+      ]
+    },
+    {
+      "id": "cost_evidence",
+      "title": "Cost and supporting evidence",
+      "description": "The questions change according to the evidence already available.",
+      "questions": [
+        "estimated_cost",
+        "evidence_route",
+        "contractor_name",
+        "photo_status",
+        "evidence_help_needed"
+      ]
+    },
+    {
+      "id": "declaration",
+      "title": "Declaration",
+      "description": "A final statement that only the applicant can make.",
+      "questions": ["declaration_accuracy"]
+    }
   ],
   "assisted": {
     "layout": "focused-pathway",

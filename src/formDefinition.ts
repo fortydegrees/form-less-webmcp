@@ -12,10 +12,15 @@ export interface AnswerOption {
   label: string
 }
 
-export interface AppliesWhen {
-  field: QuestionId
-  equals: string
-}
+export type AppliesWhen =
+  | {
+      field: QuestionId
+      equals: string
+    }
+  | {
+      field: QuestionId
+      in: readonly string[]
+    }
 
 export interface QuestionDefinition {
   id: QuestionId
@@ -90,16 +95,25 @@ interface RawProperty {
 }
 
 interface RawConditional {
-  if: { properties: Record<string, { const: string }>; required: readonly string[] }
+  if: { properties: Record<string, { const?: string; enum?: readonly string[] }>; required: readonly string[] }
   then: { required: readonly QuestionId[] }
 }
 
 const schemaProperties = rawSchema.properties as Record<QuestionId, RawProperty>
 const conditionByQuestion = new Map<QuestionId, AppliesWhen>()
 for (const conditional of rawSchema.allOf as unknown as readonly RawConditional[]) {
-  const [field, condition] = Object.entries(conditional.if.properties)[0] as [QuestionId, { const: string }]
+  const [field, condition] = Object.entries(conditional.if.properties)[0] as [
+    QuestionId,
+    { const?: string; enum?: readonly string[] },
+  ]
+  const appliesWhen: AppliesWhen | undefined = condition.const !== undefined
+    ? { field, equals: condition.const }
+    : condition.enum
+      ? { field, in: condition.enum }
+      : undefined
+  if (!appliesWhen) continue
   for (const questionId of conditional.then.required) {
-    conditionByQuestion.set(questionId, { field, equals: condition.const })
+    conditionByQuestion.set(questionId, appliesWhen)
   }
 }
 

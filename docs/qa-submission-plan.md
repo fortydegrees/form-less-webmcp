@@ -17,10 +17,12 @@ the deployed build.
 
 ## Contract and domain checks
 
-- [ ] Schema contains 24 unique fields across all five UI sections.
+- [ ] Schema contains 34 unique fields across all five UI sections.
 - [ ] Standard UI, adaptive UI, tool enums, and validation read the same contract.
-- [ ] Benefit/income, repair-risk, and contractor branches recalculate correctly.
-- [ ] Inapplicable questions are excluded from pathway and review.
+- [ ] Ownership, benefit/income, repair-specific, and evidence branches
+      recalculate correctly, including nested and enum-based conditions.
+- [ ] Inapplicable and undecided questions remain distinct; only applicable
+      questions appear in pathway and review.
 - [ ] Schema type/range/pattern/length constraints produce deterministic issues.
 - [ ] Cross-field tenure, finances, urgency, and evidence rules produce the
       documented result.
@@ -28,7 +30,7 @@ the deployed build.
 
 ## Consent and authority checks
 
-- [ ] `propose_answers` accepts 1–8 valid agent-writable fields.
+- [ ] `propose_answers` accepts 1–10 valid agent-writable fields.
 - [ ] Proposals do not alter canonical answers.
 - [ ] Individual Confirm stores only that proposal.
 - [ ] Reject removes the proposal without changing the answer.
@@ -52,7 +54,7 @@ fully relaunched.
   - `explain_requirement`
   - `validate_application`
   - `get_application_review`
-- [ ] `inspect_application` returns 24 questions, five sections, conditions,
+- [ ] `inspect_application` returns 34 questions, five sections, conditions,
       allowed values, live answers, and agent-write flags.
 - [ ] `configure_assistance` visibly focuses the personal-pathway heading and
       does not change any answer.
@@ -79,15 +81,15 @@ fully relaunched.
 
 ## Canonical filmed journey
 
-1. Show the standard 24-question form and five sections.
+1. Show the standard form: 34 possible questions across five sections.
 2. Show six available site tools and zero submit tools.
 3. Send the canonical request with “use site tools—not browser clicks.”
 4. Show `inspect_application` and the blue interface transformation.
-5. Pause on pathway counts and evidence plan.
-6. Show a multi-answer proposal queue; explain that `stored: 0`.
+5. Pause on total, current-route, not-needed, undecided, and evidence counts.
+6. Show ten proposed answers; explain that `stored: 0`.
 7. Human confirms the reviewed proposals.
-8. Show conditional path recalculation and one unanswered fact the agent did not
-   invent.
+8. Show the 16-question route, its 18 excluded alternatives once resolved, and
+   the six decisions the agent did not invent.
 9. Retrieve one official rule and complete the remaining answers.
 10. Run deterministic validation and open review.
 11. Show `availableToAgent: false` and zero submission tools.

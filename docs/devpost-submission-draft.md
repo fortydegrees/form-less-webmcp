@@ -74,7 +74,7 @@ App status: `New`
 
 Testing instructions:
 
-> No account or credentials are required. Open the live URL in the latest ChatGPT desktop app using GPT-5.6 Sol or Terra, or in Chrome 146+ with WebMCP testing enabled. The app starts as a blank standard 24-question application. Ask the agent to use the site's tools rather than browser clicks. Use Reset demo to restore it at any time. The normal human workflow remains available when WebMCP is unsupported.
+> No account or credentials are required. Open the live URL in the latest ChatGPT desktop app using GPT-5.6 Sol or Terra, or in Chrome 146+ with WebMCP testing enabled. The app starts as a blank standard application with 34 possible questions across five sections. Ask the agent to use the site's tools rather than browser clicks. Use Reset demo to restore it at any time. The normal human workflow remains available when WebMCP is unsupported.
 
 Agents or clients tested:
 
@@ -102,7 +102,7 @@ keyboard, focus, contrast and reflow problems.
 Alderwick Home Support is a fictional urgent-repair grant service and a concrete
 test of a broader idea: a website can define one machine-readable form contract
 and use it to serve both people and their chosen agents. The standard experience
-is a realistic 24-question application with five sections, conditional branches,
+is a realistic 34-question application with five sections, nested conditional branches,
 evidence requirements and cross-field rules.
 
 Sources:
@@ -171,7 +171,7 @@ runtime validation and a concise structured result. Registration is
 feature-detected and cleaned up with an `AbortController` when the React root
 unmounts.
 
-`propose_answers` cannot write an application answer. It creates up to eight
+`propose_answers` cannot write an application answer. It creates up to ten
 visible proposals, and the applicant must confirm or reject them in the page.
 The proposal schema is generated from fields marked agent-writable; the final
 declaration is deliberately excluded. Confirmation validates again at the human

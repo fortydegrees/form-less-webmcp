@@ -7,7 +7,7 @@ right interface.**
 
 This fictional urgent home-repair grant demonstrates a reusable pattern for
 personally adaptive web interfaces. The standard experience is a conventional
-24-question council application with five sections, conditional branches,
+34-question council application with five sections, nested conditional branches,
 evidence requirements, and cross-field rules. A visitor can ask their external
 agent to inspect the service's structured contract and activate a focused
 pathway containing only the questions relevant to their confirmed answers.
@@ -22,7 +22,7 @@ demo, not a real application or source of eligibility advice.
 
 ## One contract, four consumers
 
-- [`src/form.schema.json`](src/form.schema.json) defines 24 fields, types,
+- [`src/form.schema.json`](src/form.schema.json) defines 34 fields, types,
   allowed values, constraints, conditional applicability, and agent-write
   boundaries using JSON Schema 2020-12 plus namespaced presentation metadata.
 - [`src/form.ui.json`](src/form.ui.json) groups the fields into five ordinary
@@ -43,7 +43,7 @@ among those capabilities using context the website does not already have.
   allowed values, and current pathway—without DOM scraping.
 - `configure_assistance` activates the site-approved focused layout and
   interaction preferences without changing answers or policy.
-- `propose_answers` stages up to eight schema-valid answers for visible human
+- `propose_answers` stages up to ten schema-valid answers for visible human
   confirmation; it cannot propose the applicant declaration.
 - `explain_requirement` returns a named site-authored rule and evidence guidance.
 - `validate_application` runs deterministic schema and service-rule checks.

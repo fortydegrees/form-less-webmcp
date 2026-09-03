@@ -95,14 +95,14 @@ export const webMcpTools: readonly WebMcpTool[] = [
     name: 'propose_answers',
     title: 'Propose structured application answers',
     description:
-      'Maps information the applicant supplied into up to eight schema-valid proposals. Proposals are displayed for individual human confirmation and never alter stored answers by themselves. The applicant declaration is unavailable to agents.',
+      'Maps information the applicant supplied into up to ten schema-valid proposals. Proposals are displayed for individual human confirmation and never alter stored answers by themselves. The applicant declaration is unavailable to agents.',
     inputSchema: {
       type: 'object',
       properties: {
         proposals: {
           type: 'array',
           minItems: 1,
-          maxItems: 8,
+          maxItems: 10,
           items: {
             type: 'object',
             properties: {

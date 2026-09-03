@@ -1,22 +1,190 @@
 {
   "requirements": [
-    { "id": "REQ-AREA", "title": "Alderwick area", "officialRule": "The home must be in an AW1, AW2, AW3 or AW4 postcode.", "plainLanguage": "This fictional scheme only covers homes in Alderwick.", "evidence": "The postcode answer is enough in this prototype." },
-    { "id": "REQ-HOME", "title": "Owner-occupied main home", "officialRule": "The applicant must own the property and live there as their main home.", "plainLanguage": "This grant is for owner-occupiers, not tenants or landlords.", "evidence": "A mortgage statement or title record would be accepted in a real service." },
-    { "id": "REQ-INCOME", "title": "Household finances", "officialRule": "The household must receive a listed income-related benefit or have annual income below £25,000, and hold less than £16,000 in savings.", "plainLanguage": "Meet either the benefit or income route, and stay below the savings limit.", "evidence": "A benefit notice or recent household income summary would be accepted." },
-    { "id": "REQ-URGENT", "title": "Urgent effect", "officialRule": "The repair must remove an essential service, create an immediate safety risk, or make an important room unusable.", "plainLanguage": "The problem must need prompt attention, rather than being a routine improvement.", "evidence": "The repair description and impact answers are used in this prototype." },
-    { "id": "REQ-COST", "title": "Repair cost", "officialRule": "The expected repair cost must be between £250 and £7,500 including tax.", "plainLanguage": "Costs outside this range are not covered by the fictional scheme.", "evidence": "A written contractor estimate can show the expected total." },
-    { "id": "REQ-EVIDENCE", "title": "Supporting evidence", "officialRule": "The applicant must have a written contractor estimate or clear photographs, plus evidence of ownership.", "plainLanguage": "You need evidence of the repair and evidence that you own the home.", "evidence": "A written estimate or clear photographs, and a mortgage statement or title record." },
-    { "id": "REQ-DECLARATION", "title": "Applicant declaration", "officialRule": "The applicant must personally confirm that the answers are accurate before submission.", "plainLanguage": "Your agent cannot make this declaration or submit for you.", "evidence": "The visible human confirmation in this prototype." }
+    {
+      "id": "REQ-AREA",
+      "title": "Alderwick area",
+      "officialRule": "The home must be in an AW1, AW2, AW3 or AW4 postcode.",
+      "plainLanguage": "This fictional scheme only covers homes in Alderwick.",
+      "evidence": "The postcode answer is enough in this prototype."
+    },
+    {
+      "id": "REQ-HOME",
+      "title": "Owner-occupied main home",
+      "officialRule": "The applicant must own and live in the property. Joint owners and leaseholders may need additional permission.",
+      "plainLanguage": "This grant is for owner-occupiers. The ownership questions change according to how the property is held.",
+      "evidence": "A mortgage statement, title record or lease would be accepted in a real service."
+    },
+    {
+      "id": "REQ-INCOME",
+      "title": "Household finances",
+      "officialRule": "The household must receive a listed income-related benefit or have annual income below £25,000, and hold less than £16,000 in savings.",
+      "plainLanguage": "Complete either the benefit route or the income route. You do not need to answer both.",
+      "evidence": "A current benefit notice or recent household income summary would be accepted."
+    },
+    {
+      "id": "REQ-URGENT",
+      "title": "Urgent effect",
+      "officialRule": "The repair must remove an essential service, create an immediate safety risk or make an important room unusable.",
+      "plainLanguage": "The site asks different safety questions for heating, electrical, structural, water and other repairs.",
+      "evidence": "The repair description and the answers for the selected repair type are used in this prototype."
+    },
+    {
+      "id": "REQ-COST",
+      "title": "Repair cost",
+      "officialRule": "The expected repair cost must be between £250 and £7,500 including tax.",
+      "plainLanguage": "Costs outside this range are not covered by the fictional scheme.",
+      "evidence": "A written contractor estimate can show the expected total."
+    },
+    {
+      "id": "REQ-EVIDENCE",
+      "title": "Supporting evidence",
+      "officialRule": "The applicant must have a written contractor estimate or clear photographs, plus evidence of ownership.",
+      "plainLanguage": "The evidence questions change according to what you already have.",
+      "evidence": "A written estimate or safely taken photographs, and a mortgage statement, title record or lease."
+    },
+    {
+      "id": "REQ-DECLARATION",
+      "title": "Applicant declaration",
+      "officialRule": "The applicant must personally confirm that the answers are accurate before submission.",
+      "plainLanguage": "Your agent cannot make this declaration or submit for you.",
+      "evidence": "The visible human confirmation in this prototype."
+    }
   ],
   "validations": [
-    { "kind": "disallow", "field": "tenure", "values": ["private_tenant", "social_tenant", "landlord"], "code": "tenure_ineligible", "severity": "ineligible", "requirementId": "REQ-HOME", "message": "This fictional grant is only for people who own and live in the property." },
-    { "kind": "disallow", "field": "main_home", "values": ["no"], "code": "main_home_ineligible", "severity": "ineligible", "requirementId": "REQ-HOME", "message": "The property must be your main home." },
-    { "kind": "disallow", "field": "financial_route", "values": ["not_sure"], "code": "finance_unsure", "severity": "incomplete", "requirementId": "REQ-INCOME", "message": "Find out whether the benefit or income route applies before review." },
-    { "kind": "disallow", "field": "financial_route", "values": ["neither"], "code": "finance_ineligible", "severity": "ineligible", "requirementId": "REQ-INCOME", "message": "This fictional grant requires a qualifying benefit or household income below £25,000." },
-    { "kind": "disallow", "field": "savings_band", "values": ["not_sure"], "code": "savings_unsure", "severity": "incomplete", "requirementId": "REQ-INCOME", "message": "Check the household savings amount before review." },
-    { "kind": "disallow", "field": "savings_band", "values": ["16000_or_more"], "code": "savings_ineligible", "severity": "ineligible", "requirementId": "REQ-INCOME", "message": "This fictional grant is only for households with less than £16,000 in savings." },
-    { "kind": "disallow", "field": "immediate_impact", "values": ["no_immediate_impact"], "code": "impact_ineligible", "severity": "ineligible", "requirementId": "REQ-URGENT", "message": "The repair must remove an essential service, create an immediate safety risk, or make an important room unusable." },
-    { "kind": "requiresAny", "field": "quote_status", "equals": "estimate_ready", "orField": "photo_status", "orEquals": "photos_ready", "target": "quote_status", "code": "repair_evidence_missing", "severity": "incomplete", "requirementId": "REQ-EVIDENCE", "message": "You need either a written contractor estimate or clear photographs before review." },
-    { "kind": "disallow", "field": "ownership_evidence", "values": ["need_help"], "code": "ownership_evidence_missing", "severity": "incomplete", "requirementId": "REQ-EVIDENCE", "message": "Find evidence that you own the property before review." }
+    {
+      "kind": "disallow",
+      "field": "tenure",
+      "values": ["private_tenant", "social_tenant", "landlord"],
+      "code": "tenure_ineligible",
+      "severity": "ineligible",
+      "requirementId": "REQ-HOME",
+      "message": "This fictional grant is only for people who own and live in the property."
+    },
+    {
+      "kind": "disallow",
+      "field": "joint_owner_consent",
+      "values": ["not_yet"],
+      "code": "joint_owner_consent_missing",
+      "severity": "incomplete",
+      "requirementId": "REQ-HOME",
+      "message": "Obtain agreement from every registered owner before review."
+    },
+    {
+      "kind": "disallow",
+      "field": "freeholder_permission",
+      "values": ["not_ready", "not_sure"],
+      "code": "freeholder_permission_missing",
+      "severity": "incomplete",
+      "requirementId": "REQ-HOME",
+      "message": "Check the lease and obtain any required freeholder permission before review."
+    },
+    {
+      "kind": "disallow",
+      "field": "ownership_evidence",
+      "values": ["need_help"],
+      "code": "ownership_evidence_missing",
+      "severity": "incomplete",
+      "requirementId": "REQ-EVIDENCE",
+      "message": "Find evidence that you own the property before review."
+    },
+    {
+      "kind": "disallow",
+      "field": "financial_route",
+      "values": ["not_sure"],
+      "code": "finance_unsure",
+      "severity": "incomplete",
+      "requirementId": "REQ-INCOME",
+      "message": "Use the financial guidance to choose the benefit or income route before review."
+    },
+    {
+      "kind": "disallow",
+      "field": "financial_route",
+      "values": ["neither"],
+      "code": "finance_ineligible",
+      "severity": "ineligible",
+      "requirementId": "REQ-INCOME",
+      "message": "This fictional grant requires a qualifying benefit or household income below £25,000."
+    },
+    {
+      "kind": "disallow",
+      "field": "savings_band",
+      "values": ["not_sure"],
+      "code": "savings_unsure",
+      "severity": "incomplete",
+      "requirementId": "REQ-INCOME",
+      "message": "Check the household savings amount before review."
+    },
+    {
+      "kind": "disallow",
+      "field": "savings_band",
+      "values": ["16000_or_more"],
+      "code": "savings_ineligible",
+      "severity": "ineligible",
+      "requirementId": "REQ-INCOME",
+      "message": "This fictional grant is only for households with less than £16,000 in savings."
+    },
+    {
+      "kind": "disallow",
+      "field": "income_evidence",
+      "values": ["need_help"],
+      "code": "income_evidence_missing",
+      "severity": "incomplete",
+      "requirementId": "REQ-INCOME",
+      "message": "Gather evidence of household income before review."
+    },
+    {
+      "kind": "disallow",
+      "field": "heating_status",
+      "values": ["working"],
+      "code": "heating_not_urgent",
+      "severity": "ineligible",
+      "requirementId": "REQ-URGENT",
+      "message": "The heating route requires a loss of heating or hot water."
+    },
+    {
+      "kind": "disallow",
+      "field": "electrical_risk",
+      "values": ["no"],
+      "code": "electrical_not_urgent",
+      "severity": "ineligible",
+      "requirementId": "REQ-URGENT",
+      "message": "The electrical route requires an immediate warning sign or an unresolved safety concern."
+    },
+    {
+      "kind": "disallow",
+      "field": "structural_risk",
+      "values": ["no"],
+      "code": "structure_not_urgent",
+      "severity": "ineligible",
+      "requirementId": "REQ-URGENT",
+      "message": "The structural route requires part of the home to be unsafe or potentially unsafe."
+    },
+    {
+      "kind": "disallow",
+      "field": "other_urgency",
+      "values": ["none"],
+      "code": "other_repair_not_urgent",
+      "severity": "ineligible",
+      "requirementId": "REQ-URGENT",
+      "message": "The repair must remove an essential service, create a safety risk or make an important room unusable."
+    },
+    {
+      "kind": "disallow",
+      "field": "evidence_route",
+      "values": ["none"],
+      "code": "repair_evidence_missing",
+      "severity": "incomplete",
+      "requirementId": "REQ-EVIDENCE",
+      "message": "Obtain a written estimate or safely taken photographs before review."
+    },
+    {
+      "kind": "disallow",
+      "field": "photo_status",
+      "values": ["not_safe"],
+      "code": "photographs_not_usable",
+      "severity": "incomplete",
+      "requirementId": "REQ-EVIDENCE",
+      "message": "Use a written estimate instead if clear photographs cannot be taken safely."
+    }
   ]
 }

@@ -5,6 +5,7 @@ import {
   configureAssistance,
   confirmProposal,
   createInitialState,
+  demoAgentProposals,
   getApplicationReview,
   getPathway,
   openReview,
@@ -28,9 +29,9 @@ function withAnswers(answers = completedDemoAnswers): ApplicationState {
 }
 
 describe('schema-driven form contract', () => {
-  it('defines one 24-question contract across five UI sections', () => {
-    expect(questionIds).toHaveLength(24)
-    expect(questions).toHaveLength(24)
+  it('defines one 34-question contract across five UI sections', () => {
+    expect(questionIds).toHaveLength(34)
+    expect(questions).toHaveLength(34)
     expect(sections).toHaveLength(5)
     expect(new Set(sections.flatMap((section) => section.questions))).toEqual(new Set(questionIds))
   })
@@ -38,14 +39,51 @@ describe('schema-driven form contract', () => {
   it('derives a personal pathway from conditional answers', () => {
     let state = createInitialState()
     expect(getPathway(state).relevantQuestionIds).not.toContain('benefit_type')
-    expect(getPathway(state).notApplicableQuestionIds).toContain('heating_status')
+    expect(getPathway(state).undecidedQuestionIds).toContain('heating_status')
 
+    state = setHumanAnswer(state, 'tenure', 'owner_occupier')
+    state = setHumanAnswer(state, 'ownership_type', 'sole')
     state = setHumanAnswer(state, 'financial_route', 'qualifying_benefit')
     state = setHumanAnswer(state, 'repair_type', 'heating')
-    state = setHumanAnswer(state, 'quote_status', 'estimate_ready')
+    state = setHumanAnswer(state, 'evidence_route', 'written_estimate')
     const pathway = getPathway(state)
-    expect(pathway.relevantQuestionIds).toEqual(expect.arrayContaining(['benefit_type', 'heating_status', 'contractor_name']))
-    expect(pathway.notApplicableQuestionIds).toEqual(expect.arrayContaining(['annual_income', 'electrical_risk', 'structural_risk']))
+    expect(pathway.relevantQuestionIds).toHaveLength(16)
+    expect(pathway.relevantQuestionIds).toEqual(expect.arrayContaining([
+      'ownership_evidence',
+      'benefit_type',
+      'savings_band',
+      'heating_status',
+      'temporary_heating',
+      'contractor_name',
+    ]))
+    expect(pathway.notApplicableQuestionIds).toHaveLength(18)
+    expect(pathway.notApplicableQuestionIds).toEqual(expect.arrayContaining([
+      'annual_income',
+      'electrical_risk',
+      'structural_risk',
+      'water_source',
+      'photo_status',
+    ]))
+    expect(pathway.undecidedQuestionIds).toHaveLength(0)
+  })
+
+  it('keeps unanswered branches distinct from questions ruled out by confirmed answers', () => {
+    let state = createInitialState()
+    expect(getPathway(state)).toMatchObject({
+      relevantQuestionIds: expect.arrayContaining(['tenure', 'financial_route', 'repair_type']),
+      notApplicableQuestionIds: [],
+      undecidedQuestionIds: expect.arrayContaining(['ownership_type', 'benefit_type', 'heating_status']),
+    })
+
+    state = setHumanAnswer(state, 'tenure', 'private_tenant')
+    const pathway = getPathway(state)
+    expect(pathway.notApplicableQuestionIds).toEqual(expect.arrayContaining([
+      'ownership_type',
+      'joint_owner_consent',
+      'freeholder_permission',
+      'ownership_evidence',
+    ]))
+    expect(pathway.undecidedQuestionIds).not.toContain('joint_owner_consent')
   })
 
   it('changes presentation without changing answers or policy state', () => {
@@ -92,7 +130,7 @@ describe('agent proposals and human decisions', () => {
       { questionId: 'repair_type', value: 'heating' },
       { questionId: 'repair_type', value: 'electrics' },
     ])).toThrowError(expect.objectContaining({ code: 'duplicate_proposal' }))
-    expect(() => proposeAnswers(createInitialState(), Array.from({ length: 9 }, () => ({ questionId: 'repair_type', value: 'heating' })))).toThrowError(expect.objectContaining({ code: 'invalid_proposals' }))
+    expect(() => proposeAnswers(createInitialState(), Array.from({ length: 11 }, () => ({ questionId: 'repair_type', value: 'heating' })))).toThrowError(expect.objectContaining({ code: 'invalid_proposals' }))
     const pending = proposeAnswers(createInitialState(), [{ questionId: 'repair_type', value: 'heating' }])
     expect(() => proposeAnswers(pending, [{ questionId: 'tenure', value: 'owner_occupier' }])).toThrowError(expect.objectContaining({ code: 'proposal_pending' }))
   })
@@ -108,16 +146,41 @@ describe('deterministic rules and submission boundary', () => {
     state = setHumanAnswer(state, 'property_postcode', 'AW8 2ZZ')
     state = setHumanAnswer(state, 'tenure', 'private_tenant')
     state = setHumanAnswer(state, 'savings_band', '16000_or_more')
-    state = setHumanAnswer(state, 'immediate_impact', 'no_immediate_impact')
+    state = setHumanAnswer(state, 'heating_status', 'working')
     const codes = validateApplication(state).map((issue) => issue.code)
-    expect(codes).toEqual(expect.arrayContaining(['pattern_property_postcode', 'tenure_ineligible', 'savings_ineligible', 'impact_ineligible']))
+    expect(codes).toEqual(expect.arrayContaining(['pattern_property_postcode', 'tenure_ineligible', 'savings_ineligible', 'heating_not_urgent']))
   })
 
   it('requires repair evidence through either allowed route', () => {
     let state = withAnswers()
-    state = setHumanAnswer(state, 'quote_status', 'none')
-    state = setHumanAnswer(state, 'photo_status', 'none')
+    state = setHumanAnswer(state, 'evidence_route', 'none')
     expect(validateApplication(state).map((issue) => issue.code)).toContain('repair_evidence_missing')
+  })
+
+  it('does not apply rules from a branch that is no longer active', () => {
+    let state = withAnswers()
+    state = setHumanAnswer(state, 'photo_status', 'not_safe')
+    expect(validateApplication(state).map((issue) => issue.code)).not.toContain('photographs_not_usable')
+
+    state = setHumanAnswer(state, 'evidence_route', 'photographs')
+    expect(validateApplication(state).map((issue) => issue.code)).toContain('photographs_not_usable')
+  })
+
+  it('maps ten supplied facts while leaving six decisions to the applicant', () => {
+    let state = proposeAnswers(createInitialState(), demoAgentProposals)
+    expect(state.pendingProposals).toHaveLength(10)
+    expect(state.answers).toEqual({})
+    for (const proposal of [...state.pendingProposals]) state = confirmProposal(state, proposal.questionId)
+    const pathway = getPathway(state)
+    expect(pathway).toMatchObject({
+      totalQuestions: 34,
+      relevantQuestionIds: expect.any(Array),
+      notApplicableQuestionIds: expect.any(Array),
+      remainingRelevant: 6,
+    })
+    expect(pathway.relevantQuestionIds).toHaveLength(16)
+    expect(pathway.notApplicableQuestionIds).toHaveLength(16)
+    expect(pathway.undecidedQuestionIds).toHaveLength(2)
   })
 
   it('keeps submission human-only and behind a passing visible review', () => {

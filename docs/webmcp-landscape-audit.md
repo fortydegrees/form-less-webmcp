@@ -163,7 +163,7 @@ Claim instead:
 
 The distinctive combination is:
 
-1. Standard JSON Schema drives the 24-question service and conditional paths.
+1. Standard JSON Schema drives the 34-question service and conditional paths.
 2. The agent receives authoritative structure, live state, rules, and approved
    presentation choices without scraping.
 3. The site visibly recomposes itself around confirmed circumstances.
@@ -235,14 +235,14 @@ Use one complete journey, not translation plus accessibility plus form filling.
 The memorable moment is one before/after transformation, but the narration must
 immediately reveal the machinery underneath it.
 
-1. Cold open on the conventional 24-question form, then cut to the personal
+1. Cold open on the conventional 34-question form, then cut to the personal
    pathway: “Same service. Same rules. A different interface for this person.”
 2. State the thesis: “The website knows the rules. Your agent knows you.
    Together they produce the right interface.”
 3. Show ChatGPT's Available Site Tools: six typed tools, zero submission tools.
 4. Send one natural prompt containing circumstances and precise interaction
    preferences, explicitly requesting site tools rather than browser clicks.
-5. Show `inspect_application` returning 24 questions, five sections, conditions,
+5. Show `inspect_application` returning 34 questions, five sections, conditions,
    current state, and write boundaries.
 6. Show `configure_assistance` produce the pathway without changing an answer.
 7. Pause on relevant, excluded, remaining, and evidence counts.

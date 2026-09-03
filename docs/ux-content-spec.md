@@ -14,8 +14,8 @@ the structure, rules, state, and interface compositions it is willing to support
 
 The first view is a credible council application, not a deliberately broken one:
 
-- 24 questions across five numbered sections
-- conditional benefit, income, repair-risk, and contractor branches
+- 34 possible questions across five numbered sections
+- nested ownership, benefit/income, repair-specific, and evidence branches
 - long-form descriptions, radio groups, select controls, and numeric constraints
 - evidence requirements and cross-field checks
 - persistent section navigation on wide screens
@@ -33,8 +33,9 @@ The agent must call site tools rather than simulate clicks.
 1. `inspect_application` retrieves the typed questions, current values,
    constraints, applicability conditions, and agent-write boundaries.
 2. `configure_assistance` activates Alderwick's approved focused-pathway layout.
-3. The transformation receives focus and reports relevant, not-applicable,
-   remaining, and evidence counts.
+3. The transformation receives focus and reports total, relevant,
+   confirmed-not-applicable, remaining, and evidence counts. Undecided
+   follow-ups remain visibly separate rather than being called removed.
 4. `propose_answers` maps only facts supplied by the visitor into a visible queue.
 5. The applicant confirms or rejects proposals individually or confirms the
    reviewed batch. No proposal writes by itself.
@@ -54,9 +55,10 @@ The agent must call site tools rather than simulate clicks.
 > photos. Build me a focused pathway and propose only answers supported by what
 > I said. Do not submit.
 
-The agent should not infer details the visitor did not provide, such as household
-size, savings, contractor name, temporary measures, or ownership evidence. Those
-remain visible questions or require a follow-up conversation.
+The opening description supports exactly ten proposals. The agent must not infer
+the ownership type, ownership evidence, savings band, temporary-heating answer,
+contractor name, or applicant declaration. Those six decisions remain visible
+for the applicant. After the route is resolved, 16 of 34 questions apply.
 
 ## Visual language
 

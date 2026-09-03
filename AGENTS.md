@@ -71,7 +71,7 @@ uncertainties, and any missing items.
 
 - A judge can open the live URL and immediately understand the service.
 - WebMCP tools are discoverable in supported ChatGPT/Chrome environments.
-- A blank 24-question, five-section standard application works without setup or
+- A blank 34-question, five-section standard application works without setup or
   credentials, and the assisted pathway is visibly different.
 - Agent actions visibly update the same application state the human sees.
 - One schema drives the standard UI, conditional pathway, deterministic checks,

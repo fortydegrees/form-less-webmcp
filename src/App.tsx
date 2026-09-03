@@ -129,7 +129,7 @@ function Hero({ status }: { status: WebMcpStatus }) {
       <div>
         <p className="eyebrow">Urgent home repair grant</p>
         <h1 id="page-title">Get help with an urgent repair to your home</h1>
-        <p className="lede">Apply for help with essential heating, electrical or structural work. Complete the full form yourself, or ask your browser agent to find the shorter route that fits your circumstances.</p>
+        <p className="lede">Apply for help with essential heating, electrical, structural or water-damage work. Complete the full form yourself, or ask your browser agent to find the shorter route that fits your circumstances.</p>
       </div>
       <div className={`connection-card connection-card--${status}`}>
         <span className="agent-orb" aria-hidden="true">✦</span>
@@ -165,8 +165,8 @@ function StandardExperience() {
   return (
     <div className="standard-shell">
       <div className="standard-intro">
-        <div><p className="eyebrow">Full application</p><h2>Apply for repair support</h2><p>Work through five sections about your home, household, repair and evidence. Follow-up questions appear when they apply to an answer you give.</p></div>
-        <div className="completion"><strong>{answered}/{applicable.length}</strong><span>relevant answers complete</span></div>
+        <div><p className="eyebrow">Full application</p><h2>Apply for repair support</h2><p>This service can ask up to {questions.length} questions across five sections. Your answers determine which ownership, financial, repair and evidence branches appear.</p></div>
+        <div className="completion"><strong>{questions.length}</strong><span>possible questions</span><small>{answered}/{applicable.length} on the current route answered</small></div>
       </div>
       <div className="standard-grid">
         <aside className="section-nav" aria-label="Application sections">
@@ -203,15 +203,23 @@ function AssistedExperience() {
   return (
     <section className="assisted-shell" aria-labelledby="pathway-title">
       <header className="pathway-header">
-        <div><p className="eyebrow">Built from this application</p><h2 id="pathway-title" tabIndex={-1}>Your route through the form</h2><p>Your agent has removed questions that do not apply and brought the useful guidance beside each decision. The council’s rules have not changed.</p></div>
+        <div><p className="eyebrow">Built from this application</p><h2 id="pathway-title" tabIndex={-1}>Your route through the form</h2><p>Your agent has brought the relevant questions and guidance into one focused route. Confirmed answers decide what is not needed; the council’s rules have not changed.</p></div>
         <button className="text-button text-button--light" type="button" onClick={() => applicationStore.configure({ active: false }, 'human')}>Return to standard form</button>
       </header>
       <div className="pathway-metrics" aria-label="Personal pathway summary">
+        <div><strong>{pathway.totalQuestions}</strong><span>possible questions</span></div>
         <div><strong>{pathway.relevantQuestionIds.length}</strong><span>questions on your route</span></div>
-        <div><strong>{pathway.notApplicableQuestionIds.length}</strong><span>questions removed</span></div>
+        <div><strong>{pathway.notApplicableQuestionIds.length}</strong><span>questions not needed</span></div>
         <div><strong>{pathway.remainingRelevant}</strong><span>answers left</span></div>
         <div><strong>{pathway.documentsNeeded.length}</strong><span>documents to prepare</span></div>
       </div>
+      {(state.pendingProposals.length > 0 || pathway.undecidedQuestionIds.length > 0) && (
+        <p className="route-note" role="status">
+          {state.pendingProposals.length > 0
+            ? `${state.pendingProposals.length} drafted answers are waiting for your review. They do not change the route until you accept them.`
+            : `${pathway.undecidedQuestionIds.length} possible follow-up ${pathway.undecidedQuestionIds.length === 1 ? 'is' : 'questions are'} waiting on your answers and ${pathway.undecidedQuestionIds.length === 1 ? 'is' : 'are'} not counted as removed.`}
+        </p>
+      )}
       {state.pendingProposals.length > 0 && <ProposalQueue />}
       <div className="assisted-grid">
         <div className="focus-workspace">
@@ -325,7 +333,7 @@ function RequirementCard({ requirementId }: { requirementId: keyof typeof requir
 function PathwayMap() {
   const state = applicationStore.getSnapshot()
   const pathway = getPathway(state)
-  return <section className="rail-card"><p className="eyebrow">Your route</p><h3>{pathway.currentSection ?? 'Ready to review'}</h3><ol className="pathway-list">{sections.map((section) => { const ids = section.questions.filter((id) => pathway.relevantQuestionIds.includes(id)); const done = ids.filter((id) => state.answers[id] !== undefined).length; return <li key={section.id} data-complete={ids.length > 0 && done === ids.length || undefined}><span>{done}/{ids.length}</span><div><strong>{section.title}</strong><small>{ids.length === 0 ? 'Removed from your route' : 'Applies to you'}</small></div></li> })}</ol></section>
+  return <section className="rail-card"><p className="eyebrow">Your route</p><h3>{pathway.currentSection ?? 'Ready to review'}</h3><ol className="pathway-list">{sections.map((section) => { const ids = section.questions.filter((id) => pathway.relevantQuestionIds.includes(id)); const waiting = section.questions.filter((id) => pathway.undecidedQuestionIds.includes(id)).length; const done = ids.filter((id) => state.answers[id] !== undefined).length; return <li key={section.id} data-complete={ids.length > 0 && done === ids.length || undefined}><span>{done}/{ids.length}</span><div><strong>{section.title}</strong><small>{waiting > 0 ? `${waiting} possible follow-up${waiting === 1 ? '' : 's'} waiting` : ids.length === 0 ? 'Not needed for this route' : 'Applies to you'}</small></div></li> })}</ol></section>
 }
 
 function EvidencePlan() {
@@ -339,7 +347,7 @@ function ActivityTrail() {
 }
 
 function SchemaProof() {
-  return <section className="schema-proof"><p className="eyebrow">How this page works</p><ul><li><strong>JSON Schema</strong><span>24 questions and constraints</span></li><li><strong>UI schema</strong><span>5 sections and an adaptive layout</span></li><li><strong>Council rules</strong><span>7 published requirements</span></li><li><strong>WebMCP</strong><span>6 site tools · no submit tool</span></li></ul></section>
+  return <section className="schema-proof"><p className="eyebrow">How this page works</p><ul><li><strong>JSON Schema</strong><span>{questions.length} questions and constraints</span></li><li><strong>UI schema</strong><span>{sections.length} sections and an adaptive layout</span></li><li><strong>Council rules</strong><span>{Object.keys(requirements).length} published requirements</span></li><li><strong>WebMCP</strong><span>6 site tools · no submit tool</span></li></ul></section>
 }
 
 function ReviewPanel() {

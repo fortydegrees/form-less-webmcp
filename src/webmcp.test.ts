@@ -24,9 +24,13 @@ describe('generated WebMCP contract', () => {
   })
 
   it('derives the proposal question enum from agent-writable schema fields', () => {
-    const schemaText = JSON.stringify(tool('propose_answers').inputSchema)
+    const proposalSchema = tool('propose_answers').inputSchema as {
+      properties: { proposals: { maxItems: number } }
+    }
+    const schemaText = JSON.stringify(proposalSchema)
     expect(schemaText).toContain('repair_description')
     expect(schemaText).not.toContain('declaration_accuracy')
+    expect(proposalSchema.properties.proposals.maxItems).toBe(10)
   })
 
   it('lets an agent inspect structure and conditional logic without scraping the DOM', async () => {
@@ -37,7 +41,7 @@ describe('generated WebMCP contract', () => {
       ]),
       sections: expect.arrayContaining([expect.objectContaining({ id: 'repair' })]),
     })
-    expect((result as { questions: unknown[] }).questions).toHaveLength(24)
+    expect((result as { questions: unknown[] }).questions).toHaveLength(34)
     expect(applicationStore.getSnapshot().history.at(-1)?.action).toBe('WebMCP · inspect_application')
   })
 
