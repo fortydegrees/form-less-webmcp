@@ -218,13 +218,25 @@ export function setHumanAnswer(
   questionId: QuestionId,
   value: string,
 ): ApplicationState {
+  const question = getQuestion(questionId)
+  const answer = question.type === 'integer' && /^\d+$/.test(value)
+    ? Number(value)
+    : value
+  const answers = { ...state.answers }
+  if (value === '') delete answers[questionId]
+  else answers[questionId] = answer
+  return { ...state, answers, validationVisible: false, screen: 'application' }
+}
+
+export function commitHumanAnswer(
+  state: ApplicationState,
+  questionId: QuestionId,
+  value: string,
+): ApplicationState {
   const answer = normalizeAnswer(questionId, value)
   const answers = { ...state.answers }
-  if (String(answer).trim() === '') delete answers[questionId]
-  else {
-    assertAnswer(questionId, answer, false)
-    answers[questionId] = answer
-  }
+  if (!hasAnswer(answer)) delete answers[questionId]
+  else answers[questionId] = answer
   return { ...state, answers, validationVisible: false, screen: 'application' }
 }
 

@@ -80,7 +80,7 @@ export default function App() {
       <main id="main-content" className="page-width main-content">
         {state.screen === 'submitted' ? <SuccessPanel /> : state.screen === 'review' ? <ReviewPanel /> : (
           <>
-            <Hero status={webMcpStatus} />
+            <Hero status={webMcpStatus} assisted={state.assistance.active} />
             <AuthorityStrip />
             {state.assistance.keyboardNavigation && <KeyboardNote />}
             {state.assistance.active ? <AssistedExperience /> : <StandardExperience />}
@@ -117,7 +117,7 @@ function SiteHeader() {
   )
 }
 
-function Hero({ status }: { status: WebMcpStatus }) {
+function Hero({ status, assisted }: { status: WebMcpStatus; assisted: boolean }) {
   const messages = {
     checking: 'Checking whether your agent can help…',
     supported: 'Your browser agent can work with this form',
@@ -130,6 +130,7 @@ function Hero({ status }: { status: WebMcpStatus }) {
         <p className="eyebrow">Urgent home repair grant</p>
         <h1 id="page-title">Get help with an urgent repair to your home</h1>
         <p className="lede">Apply for help with essential heating, electrical, structural or water-damage work. Complete the full form yourself, or ask your browser agent to find the shorter route that fits your circumstances.</p>
+        {!assisted && <a className="start-link" href="#application-form">Start the full application</a>}
       </div>
       <div className={`connection-card connection-card--${status}`}>
         <span className="agent-orb" aria-hidden="true">✦</span>
@@ -161,9 +162,9 @@ function StandardExperience() {
   const state = applicationStore.getSnapshot()
   const issues = state.validationVisible ? validateApplication(state) : []
   const applicable = questions.filter((question) => isQuestionApplicable(question, state.answers))
-  const answered = applicable.filter((question) => state.answers[question.id] !== undefined).length
+  const answered = getPathway(state).answeredRelevant
   return (
-    <div className="standard-shell">
+    <div className="standard-shell" id="application-form">
       <div className="standard-intro">
         <div><p className="eyebrow">Full application</p><h2>Apply for repair support</h2><p>This service can ask up to {questions.length} questions across five sections. Your answers determine which ownership, financial, repair and evidence branches appear.</p></div>
         <div className="completion"><strong>{questions.length}</strong><span>possible questions</span><small>{answered}/{applicable.length} on the current route answered</small></div>
@@ -172,7 +173,6 @@ function StandardExperience() {
         <aside className="section-nav" aria-label="Application sections">
           <p>In this application</p>
           <ol>{sections.map((section, index) => <li key={section.id}><a href={`#section-${section.id}`}><span>{String(index + 1).padStart(2, '0')}</span>{section.title}</a></li>)}</ol>
-          <SchemaProof />
         </aside>
         <form className="standard-form" onSubmit={(event) => { event.preventDefault(); applicationStore.runValidation('human') }} noValidate>
           <div className="safety-note"><strong>If anyone is in immediate danger</strong>Leave the property and contact the emergency services. This demonstration service cannot arrange emergency help.</div>
@@ -287,6 +287,7 @@ function QuestionField({ question, issue, emphasized = false }: { question: Ques
   const errorId = `${question.id}-error`
   const describedBy = issue ? `${hintId} ${errorId}` : hintId
   const setValue = (next: string) => applicationStore.setHumanAnswer(question.id, next)
+  const commitValue = (next: string) => applicationStore.commitHumanAnswer(question.id, next)
 
   if (question.input === 'checkbox') {
     return (
@@ -312,9 +313,9 @@ function QuestionField({ question, issue, emphasized = false }: { question: Ques
   return (
     <div className={`question-field ${issue ? 'question-field--invalid' : ''} ${emphasized ? 'question-field--emphasized' : ''}`}>
       <label htmlFor={question.id}>{question.label}</label><p className="hint" id={hintId}>{question.hint}</p>
-      {question.input === 'textarea' ? <textarea {...common} rows={5} maxLength={question.maxLength} onChange={(event) => setValue(event.target.value)} />
+      {question.input === 'textarea' ? <textarea {...common} rows={5} maxLength={question.maxLength} onChange={(event) => setValue(event.target.value)} onBlur={(event) => commitValue(event.target.value)} />
         : question.input === 'select' && question.options ? <select {...common} onChange={(event) => setValue(event.target.value)}><option value="">Select an answer</option>{question.options.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}</select>
-          : <div className={question.input === 'currency' ? 'prefixed-input' : undefined}>{question.input === 'currency' && <span aria-hidden="true">£</span>}<input {...common} type="text" inputMode={question.type === 'integer' ? 'numeric' : undefined} onChange={(event) => setValue(event.target.value)} /></div>}
+          : <div className={question.input === 'currency' ? 'prefixed-input' : undefined}>{question.input === 'currency' && <span aria-hidden="true">£</span>}<input {...common} type="text" inputMode={question.type === 'integer' ? 'numeric' : undefined} onChange={(event) => setValue(event.target.value)} onBlur={(event) => commitValue(event.target.value)} /></div>}
       {issue && <p className="field-error" id={errorId}>{issue.message}</p>}
     </div>
   )

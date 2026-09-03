@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   DomainError,
   completedDemoAnswers,
+  commitHumanAnswer,
   configureAssistance,
   confirmProposal,
   createInitialState,
@@ -29,6 +30,25 @@ function withAnswers(answers = completedDemoAnswers): ApplicationState {
 }
 
 describe('schema-driven form contract', () => {
+  it('preserves spaces and incomplete values while the applicant is typing', () => {
+    let state = setHumanAnswer(createInitialState(), 'contractor_name', 'Alderwick Heating ')
+    expect(state.answers.contractor_name).toBe('Alderwick Heating ')
+
+    state = setHumanAnswer(state, 'estimated_cost', '24x')
+    expect(state.answers.estimated_cost).toBe('24x')
+  })
+
+  it('normalizes text, postcodes, and numbers only when the applicant leaves a field', () => {
+    let state = commitHumanAnswer(createInitialState(), 'contractor_name', '  Alderwick Heating Co  ')
+    expect(state.answers.contractor_name).toBe('Alderwick Heating Co')
+
+    state = commitHumanAnswer(state, 'property_postcode', 'aw2  4la')
+    expect(state.answers.property_postcode).toBe('AW2 4LA')
+
+    state = commitHumanAnswer(state, 'estimated_cost', '2450')
+    expect(state.answers.estimated_cost).toBe(2450)
+  })
+
   it('defines one 34-question contract across five UI sections', () => {
     expect(questionIds).toHaveLength(34)
     expect(questions).toHaveLength(34)

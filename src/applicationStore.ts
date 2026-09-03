@@ -1,4 +1,5 @@
 import {
+  commitHumanAnswer,
   configureAssistance,
   confirmProposal,
   createInitialState,
@@ -40,6 +41,9 @@ export const applicationStore = {
   },
   setHumanAnswer(questionId: QuestionId, value: string) {
     return publish(setHumanAnswer(state, questionId, value))
+  },
+  commitHumanAnswer(questionId: QuestionId, value: string) {
+    return publish(commitHumanAnswer(state, questionId, value))
   },
   proposeAgentAnswers(inputs: readonly { questionId: string; value: unknown; rationale?: unknown }[]) {
     return publish(proposeAnswers(state, inputs))
