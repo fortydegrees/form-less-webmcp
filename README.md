@@ -18,6 +18,9 @@ submission are never available as tools.
 Alderwick and all policy in this repository are fictional. This is a technology
 demo, not a real application or source of eligibility advice.
 
+- Live demo: <https://fortydegrees.github.io/right-questions-webmcp/>
+- Source: <https://github.com/fortydegrees/right-questions-webmcp>
+
 ## One contract, four consumers
 
 - [`src/form.schema.json`](src/form.schema.json) defines 34 fields, types,
@@ -69,6 +72,9 @@ pnpm test
 pnpm lint
 pnpm build
 ```
+
+Pushes to `main` deploy the static `dist` output to GitHub Pages through
+`.github/workflows/deploy-pages.yml`.
 
 To inspect live tools, use Chrome 146 or later with **WebMCP for testing**
 enabled and Chrome fully relaunched. For an agent-driven demo, open the page in

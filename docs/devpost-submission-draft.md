@@ -8,7 +8,7 @@ human-authorised action.
 
 ### Project overview
 
-- Project name: required, 60 characters. Pending David's decision.
+- Project name: required, 60 characters. Approved as `Right Questions`.
 - Elevator pitch: required, 200 characters.
 - Thumbnail: JPEG, PNG, or GIF.
 
@@ -61,8 +61,8 @@ Built with tags:
 
 Project links:
 
-- Live app: `[LIVE_URL]`
-- Public source: `[REPO_URL]`
+- Live app: `https://fortydegrees.github.io/right-questions-webmcp/`
+- Public source: `https://github.com/fortydegrees/right-questions-webmcp`
 
 Submitter type: `Individual`
 
@@ -200,8 +200,8 @@ for people and expose it safely to agents.**
 
 Do not finalise these until evidence exists:
 
-- final project name and thumbnail
-- live URL and deployment ID
+- thumbnail
+- live URL and deployment ID/runtime proof
 - public repository URL and visible licence detection
 - exact ChatGPT app/client/model/version used for WebMCP QA
 - public YouTube URL, duration and audio check

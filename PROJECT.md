@@ -8,14 +8,12 @@ Deadline: 3 September 2026, 21:00 BST. Target submission: 19:00 BST.
 
 The product and WebMCP architecture are feature-complete. Work is now
 video-first release closeout: freeze the judge story, make only changes required
-by a specific shot or release gate, deploy the approved
-branch, capture runtime proof, record the narrated demo, and complete Devpost.
+by a specific shot or release gate, deploy `main`, capture runtime proof, record
+the narrated demo, and complete Devpost.
 
-The TasteSkill presentation candidate lives on `experiment/taste-skill`; its
-presentation implementation began at `a0380fb`. The verified pre-TasteSkill
-comparison remains on `main` at `2626222`. Branch selection, merging,
-publication, deployment, video upload, and Devpost submission remain David's
-decisions.
+David approved the name **Right Questions**, publication, and deployment on
+3 September 2026. The selected release now lives on `main`; video upload and
+Devpost submission remain separate human-authorised actions.
 
 ## Product thesis
 

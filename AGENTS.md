@@ -49,12 +49,11 @@ such as the eight-field guided-toggle prototype or a multi-programme navigator.
 - Build backwards from a public narrated demo under three minutes.
 - Make no new feature unless it materially improves a specific judge-facing shot
   or fixes a release blocker.
-- The release candidate is currently on `experiment/taste-skill`; its
-  presentation implementation began at `a0380fb`. `main` remains at the
-  verified pre-TasteSkill comparison commit `2626222`.
-- Do not merge branches, publish a repository, deploy, upload video, edit Devpost,
-  or submit anything without David's explicit approval.
-- The public project name is still undecided.
+- **Right Questions** is the approved public name and `main` is the selected
+  release branch.
+- David approved public repository creation and deployment on 3 September 2026.
+  Do not upload video, edit Devpost, or submit anything without separate explicit
+  approval.
 
 ## Collaboration
 
