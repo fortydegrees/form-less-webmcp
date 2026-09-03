@@ -225,14 +225,15 @@ function KeyboardNote() {
 
 function StandardExperience() {
   const state = applicationStore.getSnapshot()
+  const pathway = getPathway(state)
   const issues = state.validationVisible ? validateApplication(state) : []
   return (
     <div className="standard-shell" id="application-form">
       <div className="standard-intro">
         <div><p className="eyebrow">Full application</p><h2>Apply for repair support</h2><p>Complete all five sections. Some questions will appear only after you tell us about your ownership, household finances and the repair.</p></div>
         <aside className="before-start" aria-labelledby="before-start-title">
-          <strong id="before-start-title">Before you start</strong>
-          <span>Have these ready if they apply:</span>
+          <strong id="before-start-title">Allow 30 to 45 minutes</strong>
+          <span>Before you start, have these ready if they apply:</span>
           <ul>
             <li>proof of ownership or permission</li>
             <li>benefit or household income evidence</li>
@@ -250,11 +251,13 @@ function StandardExperience() {
           {state.validationVisible && <IssueSummary issues={issues} />}
           {sections.map((section, sectionIndex) => {
             const sectionQuestions = section.questions.map(getQuestion).filter((question) => isQuestionApplicable(question, state.answers))
+            const possibleFollowUps = section.questions.map(getQuestion).filter((question) => pathway.undecidedQuestionIds.includes(question.id))
             return (
               <section className="form-section" id={`section-${section.id}`} key={section.id} aria-labelledby={`${section.id}-title`}>
                 <header><span>{String(sectionIndex + 1).padStart(2, '0')}</span><div><h3 id={`${section.id}-title`}>{section.title}</h3><p>{section.description}</p></div></header>
                 <div className="form-section__fields">
                   {sectionQuestions.map((question) => <QuestionField key={question.id} question={question} issue={issues.find((issue) => issue.questionId === question.id)} />)}
+                  {possibleFollowUps.length > 0 && <PossibleFollowUps questions={possibleFollowUps} />}
                 </div>
               </section>
             )
@@ -263,6 +266,16 @@ function StandardExperience() {
         </form>
       </div>
     </div>
+  )
+}
+
+function PossibleFollowUps({ questions: possibleQuestions }: { questions: readonly QuestionDefinition[] }) {
+  return (
+    <aside className="possible-follow-ups" aria-label="Questions that may also apply">
+      <strong>You may also need to answer</strong>
+      <p>Your answers in this section decide whether these questions apply.</p>
+      <ul>{possibleQuestions.map((question) => <li key={question.id}>{question.label}</li>)}</ul>
+    </aside>
   )
 }
 

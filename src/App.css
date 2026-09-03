@@ -87,6 +87,11 @@
 .form-section h3 { margin: 0 0 6px; color: var(--midnight); font-size: 1.55rem; font-weight: 740; letter-spacing: -.025em; }
 .form-section header p { margin: 0; color: var(--muted); font-size: .88rem; line-height: 1.5; }
 .form-section__fields { display: grid; gap: 34px; padding-left: 54px; }
+.possible-follow-ups { padding: 20px 22px 22px; border-left: 4px solid #88959b; background: #f2f4f5; }
+.possible-follow-ups strong { color: var(--midnight); font-size: .9rem; }
+.possible-follow-ups p { margin: 5px 0 13px; color: var(--muted); font-size: .8rem; line-height: 1.45; }
+.possible-follow-ups ul { columns: 2; column-gap: 36px; margin: 0; padding-left: 19px; color: var(--ink); font-size: .78rem; line-height: 1.45; }
+.possible-follow-ups li { break-inside: avoid; margin-bottom: 7px; padding-right: 10px; }
 
 .question-field { min-width: 0; padding: 0; border: 0; }
 .question-field legend, .question-field > label { display: block; max-width: 700px; margin-bottom: 7px; color: var(--ink); font-size: 1rem; font-weight: 720; line-height: 1.4; }
@@ -102,6 +107,8 @@
 .choice-list:has(input:checked) label:has(input:checked), .check-choice:has(input:checked) { border-color: var(--service); background: var(--service-soft); box-shadow: inset 4px 0 var(--service); }
 .choice-list input, .check-choice input { width: 20px; height: 20px; margin: 0; accent-color: var(--service); }
 .choice-list span, .check-choice span { padding-top: 1px; font-size: .88rem; font-weight: 630; line-height: 1.4; }
+.question-field > .check-choice { display: flex; align-items: center; }
+.check-choice span { padding-top: 0; line-height: 20px; }
 .prefixed-input { width: min(100%, 620px); display: grid; grid-template-columns: 46px 1fr; }
 .prefixed-input > span { display: grid; place-items: center; border: 2px solid #61717a; border-right: 0; background: #e8edef; font-weight: 760; }
 .prefixed-input input[type="text"] { width: 100%; }
@@ -277,6 +284,7 @@
   .standard-form { padding: 26px 20px 38px; }
   .form-section > header { grid-template-columns: 30px 1fr; }
   .form-section__fields { padding-left: 0; }
+  .possible-follow-ups ul { columns: 1; }
   .form-actions { align-items: flex-start; flex-direction: column; }
   .pathway-header { padding: 28px 22px; }
   .pathway-metrics { grid-template-columns: repeat(2, 1fr); }
