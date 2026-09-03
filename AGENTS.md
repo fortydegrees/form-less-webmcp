@@ -1,80 +1,47 @@
-# WebMCP Civic Project Instructions
+# Right Questions — contributor guidance
 
-## Mission
+## Product contract
 
-Ship a polished, working WebMCP challenge entry before 3 September 2026 at
-21:00 BST. The product is a fictional UK-style urgent home-repair grant service
-that becomes easier to use when a person and their chosen agent collaborate.
+Right Questions is a fictional public-service application demonstrating a
+schema-driven WebMCP interface. Read `README.md` and `docs/architecture.md`
+before material changes.
 
-This is a hackathon reference implementation, not a real council website,
-production grant system, or source of eligibility advice. Alderwick Council,
-its policy, applicant data, reference numbers, and submission flow are fictional.
+The product has two non-negotiable authority boundaries:
 
-## Start Here
+- the website owns policy, validation, available layouts and canonical state;
+- the applicant owns answer confirmation, the declaration and submission.
 
-Before material work:
+No agent tool may confirm a proposed answer, make the declaration or submit the
+application.
 
-1. Read `PROJECT.md` for the frozen product thesis, judge story, architecture,
-   scope, and acceptance criteria.
-2. Read `README.md` for the current implementation and commands.
-3. Read `docs/qa-submission-plan.md` for release or demo work, and
-   `docs/ux-content-spec.md` for presentation or copy work.
-4. Inspect `git status --short --branch` before editing. This checkout is shared
-   with OpenClaw and may already contain deliberate work.
-
-Do not reconstruct product intent from the UI alone or revive superseded ideas
-such as the eight-field guided-toggle prototype or a multi-programme navigator.
-
-## Working Rules
+## Engineering rules
 
 - Use pnpm only.
-- Prefer React, TypeScript, and browser-native APIs. Add dependencies only when
-  they materially reduce deadline risk.
-- Keep policy, eligibility, validation, and workflow state deterministic. Do
-  not call a model or external API from the product.
-- Keep WebMCP tool handlers thin; shared domain functions must power both the
-  visible UI and registered tools.
-- Do not expose final submission as an agent tool. Only the visible human UI
-  may complete submission.
-- Preserve keyboard focus, semantic controls, useful labels, contrast, reduced
-  motion, and screen-reader announcements.
-- Do not claim WCAG compliance or represent disabled people without evidence.
-  Describe functional interaction preferences precisely.
-- Never use real council branding, personal data, or third-party trademarks.
-- Keep the app deployable as static assets and usable without authentication.
-- Run `pnpm test`, `pnpm lint`, and `pnpm build` before claiming completion.
+- Keep `form.schema.json`, `form.ui.json` and `form.rules.json` as the source of
+  truth. The standard UI, focused UI, domain engine and WebMCP tools must not
+  drift into separate copies of the rules.
+- Keep policy, applicability and validation deterministic. No model or external
+  API runs inside the product.
+- Keep WebMCP handlers thin and route changes through the shared application
+  store.
+- Preserve the complete human workflow when WebMCP is unavailable.
+- Preserve semantic controls, keyboard focus, error associations, reduced
+  motion and narrow-screen reflow.
+- Alderwick Council, its policies, applicant data and submission flow must
+  remain clearly fictional.
+- Avoid unrelated refactors and dependencies that do not improve the shipped
+  demonstration.
 
-## Current Phase
+## Verification
 
-- Build backwards from a public narrated demo under three minutes.
-- Make no new feature unless it materially improves a specific judge-facing shot
-  or fixes a release blocker.
-- **Right Questions** is the approved public name and `main` is the selected
-  release branch.
-- David approved public repository creation and deployment on 3 September 2026.
-  Do not upload video, edit Devpost, or submit anything without separate explicit
-  approval.
+Before committing a material change, run:
 
-## Collaboration
+```bash
+pnpm test
+pnpm lint
+pnpm build
+```
 
-The MacBook Air Codex app and OpenClaw operate on this same MBP-hosted checkout.
-Do not edit the same files concurrently. For a quick tweak, work sequentially,
-keep the diff scoped, and commit it. For parallel work, use separate branches or
-Git worktrees and integrate deliberately. Never discard or overwrite an existing
-dirty diff you did not create.
-
-When handing work back, state files changed, commands/tests run, assumptions,
-uncertainties, and any missing items.
-
-## Definition of Done
-
-- A judge can open the live URL and immediately understand the service.
-- WebMCP tools are discoverable in supported ChatGPT/Chrome environments.
-- A blank 34-question, five-section standard application works without setup or
-  credentials, and the assisted pathway is visibly different.
-- Agent actions visibly update the same application state the human sees.
-- One schema drives the standard UI, conditional pathway, deterministic checks,
-  and WebMCP schemas.
-- Proposals remain unstored until visible human confirmation.
-- The user sees a complete review and must personally press Submit.
-- The public repo builds from documented instructions and includes a licence.
+For WebMCP changes, also verify that the browser registers exactly six tools,
+that proposals report zero stored answers before human confirmation, and that
+no submission tool exists.
