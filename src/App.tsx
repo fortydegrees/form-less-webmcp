@@ -383,8 +383,8 @@ function AssistedExperience() {
   return (
     <section className="assisted-shell" aria-labelledby="pathway-title">
       <header className="pathway-header" data-focus-region>
-        <div><p className="eyebrow">Focused application</p><h2 id="pathway-title" className="focus-target" tabIndex={-1}>Your route through the form</h2><p>Your agent has brought the relevant questions and guidance into one focused route. Confirmed answers decide what is not needed; the council’s rules have not changed.</p>{state.assistance.keyboardNavigation && <p className="pathway-keyboard-note"><strong>Keyboard route active.</strong> Use Tab between controls and arrow keys within answer choices.</p>}</div>
-        <button className="text-button text-button--light" type="button" onClick={() => applicationStore.configure({ active: false }, 'human')}>Return to standard form</button>
+        <div><p className="eyebrow">Personalised view</p><h2 id="pathway-title" className="focus-target" tabIndex={-1}>Your application</h2><p>Based on the answers you confirm, this view keeps the questions and guidance that apply to you. The council’s rules have not changed.</p>{state.assistance.keyboardNavigation && <p className="pathway-keyboard-note"><strong>Keyboard route active.</strong> Use Tab between controls and arrow keys within answer choices.</p>}</div>
+        <button className="text-button" type="button" onClick={() => applicationStore.configure({ active: false }, 'human')}>Return to standard form</button>
       </header>
       <div className="pathway-metrics" aria-label="Personal pathway summary">
         <div><strong>{pathway.totalQuestions}</strong><span>possible questions</span></div>
