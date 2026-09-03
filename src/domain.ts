@@ -78,7 +78,7 @@ export interface ValidationIssue {
 export interface ApplicationStep {
   question: QuestionDefinition
   currentValue: AnswerValue | null
-  reason: 'incomplete' | 'needs-correction'
+  reason: 'incomplete' | 'needs-correction' | 'complete'
   issue: ValidationIssue | null
   sectionTitle: string
   whyAsked: string
@@ -454,14 +454,20 @@ export function validateApplication(state: ApplicationState): readonly Validatio
 export function getApplicationStep(state: ApplicationState): ApplicationStep | null {
   const firstIssue = validateApplication(state)[0]
   if (!firstIssue) return null
-  const question = getQuestion(firstIssue.questionId)
+  return getApplicationStepForQuestion(state, firstIssue.questionId)
+}
+
+export function getApplicationStepForQuestion(state: ApplicationState, questionId: QuestionId): ApplicationStep | null {
+  if (!getPathway(state).relevantQuestionIds.includes(questionId)) return null
+  const question = getQuestion(questionId)
+  const questionIssue = validateApplication(state).find((candidate) => candidate.questionId === questionId) ?? null
   const section = sections.find((candidate) => candidate.questions.includes(question.id))
   const requirement = question.requirementId ? requirements[question.requirementId] : undefined
   return {
     question,
     currentValue: state.answers[question.id] ?? null,
-    reason: hasAnswer(state.answers[question.id]) ? 'needs-correction' : 'incomplete',
-    issue: firstIssue,
+    reason: questionIssue ? (hasAnswer(state.answers[question.id]) ? 'needs-correction' : 'incomplete') : 'complete',
+    issue: questionIssue,
     sectionTitle: section?.title ?? 'Application',
     whyAsked: requirement?.plainLanguage ?? section?.description ?? 'This answer is part of the application.',
   }

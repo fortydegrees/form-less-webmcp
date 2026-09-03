@@ -76,6 +76,9 @@ export const applicationStore = {
   openReview() {
     return publish(openReview(state))
   },
+  returnToApplication() {
+    return publish({ ...state, screen: 'application', assistance: { ...state.assistance, active: true }, announcement: 'Returned to your personal application route.' })
+  },
   submit() {
     return publish(submitApplication(state))
   },

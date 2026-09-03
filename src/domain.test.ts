@@ -8,6 +8,7 @@ import {
   createInitialState,
   demoAgentProposals,
   getApplicationReview,
+  getApplicationStepForQuestion,
   getPathway,
   openReview,
   proposeAnswers,
@@ -112,6 +113,15 @@ describe('schema-driven form contract', () => {
     expect(assisted.assistance).toMatchObject({ active: true, keyboardNavigation: true, plainLanguage: true })
     expect(assisted.answers).toEqual(initial.answers)
     expect(assisted.history[0]).toMatchObject({ actor: 'agent', action: 'WebMCP · configure_assistance' })
+  })
+
+  it('keeps a completed answer available until the interface deliberately advances', () => {
+    const state = setHumanAnswer(createInitialState(), 'property_postcode', 'AW2 4LA')
+    expect(getApplicationStepForQuestion(state, 'property_postcode')).toMatchObject({
+      currentValue: 'AW2 4LA',
+      reason: 'complete',
+      issue: null,
+    })
   })
 })
 

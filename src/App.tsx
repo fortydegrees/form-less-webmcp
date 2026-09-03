@@ -3,6 +3,7 @@ import { applicationStore } from './applicationStore'
 import {
   formatAnswer,
   getApplicationStep,
+  getApplicationStepForQuestion,
   getPathway,
   getQuestion,
   isQuestionApplicable,
@@ -10,6 +11,7 @@ import {
   sections,
   validateApplication,
   type QuestionDefinition,
+  type QuestionId,
   type ValidationIssue,
 } from './domain'
 import { registerWebMcpTools, webMcpTools } from './webmcp'
@@ -47,6 +49,7 @@ export default function App() {
   const [toolsOpen, setToolsOpen] = useState(false)
   const previousAssistance = useRef(state.assistance.active)
   const previousProposalCount = useRef(state.pendingProposals.length)
+  const previousScreen = useRef(state.screen)
 
   useEffect(() => {
     document.title = state.screen === 'submitted'
@@ -72,6 +75,20 @@ export default function App() {
     previousProposalCount.current = state.pendingProposals.length
   }, [state.assistance.reducedMotion, state.pendingProposals.length])
 
+  useEffect(() => {
+    if (previousScreen.current !== state.screen) {
+      const target = state.screen === 'review'
+        ? 'review-title'
+        : state.screen === 'submitted'
+          ? 'success-title'
+          : state.assistance.active
+            ? 'pathway-title'
+            : 'page-title'
+      requestAnimationFrame(() => focusAndReveal(target, state.assistance.reducedMotion))
+    }
+    previousScreen.current = state.screen
+  }, [state.assistance.active, state.assistance.reducedMotion, state.screen])
+
   return (
     <div className="app-shell" data-assisted={state.assistance.active || undefined} data-reduced-motion={state.assistance.reducedMotion || undefined}>
       <a className="skip-link" href="#main-content">Skip to application</a>
@@ -80,9 +97,7 @@ export default function App() {
       <main id="main-content" className="page-width main-content">
         {state.screen === 'submitted' ? <SuccessPanel /> : state.screen === 'review' ? <ReviewPanel /> : (
           <>
-            <Hero assisted={state.assistance.active} />
-            {state.assistance.keyboardNavigation && <KeyboardNote />}
-            {state.assistance.active ? <AssistedExperience /> : <StandardExperience />}
+            {state.assistance.active ? <AssistedExperience /> : <><Hero /><StandardExperience /></>}
           </>
         )}
       </main>
@@ -96,9 +111,10 @@ export default function App() {
 function focusAndReveal(id: string, reducedMotion: boolean) {
   const element = document.getElementById(id)
   if (!element) return
+  const region = element.closest<HTMLElement>('[data-focus-region]') ?? element
   const systemReduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
   element.focus({ preventScroll: true })
-  element.scrollIntoView({ behavior: reducedMotion || systemReduced ? 'auto' : 'smooth', block: 'start' })
+  region.scrollIntoView({ behavior: reducedMotion || systemReduced ? 'auto' : 'smooth', block: 'start' })
 }
 
 function PrototypeBanner() {
@@ -125,14 +141,14 @@ function SiteHeader({ status, onOpenTools }: { status: WebMcpStatus; onOpenTools
   )
 }
 
-function Hero({ assisted }: { assisted: boolean }) {
+function Hero() {
   return (
     <section className="hero" aria-labelledby="page-title">
       <div>
         <p className="eyebrow">Urgent home repair grant</p>
         <h1 id="page-title">Get help with an urgent repair to your home</h1>
         <p className="lede">Apply for help with essential heating, electrical, structural or water-damage work. Your answers determine which questions and evidence apply to your home.</p>
-        {!assisted && <a className="start-link" href="#application-form">Start the full application</a>}
+        <a className="start-link" href="#application-form">Start the full application</a>
       </div>
     </section>
   )
@@ -217,10 +233,6 @@ function AgentToolsDialog({ open, status, onClose }: { open: boolean; status: We
       </div>
     </dialog>
   )
-}
-
-function KeyboardNote() {
-  return <div className="keyboard-note" role="note"><strong>Keyboard route active.</strong> Use Tab to move between controls and arrow keys within answer choices.</div>
 }
 
 function StandardExperience() {
@@ -324,12 +336,42 @@ function ConditionalQuestionPreview({ question }: { question: QuestionDefinition
 function AssistedExperience() {
   const state = applicationStore.getSnapshot()
   const pathway = getPathway(state)
-  const step = getApplicationStep(state)
+  const suggestedStep = getApplicationStep(state)
+  const [activeQuestionId, setActiveQuestionId] = useState<QuestionId | null>(() => suggestedStep?.question.id ?? null)
+  const previousActiveQuestionId = useRef(activeQuestionId)
+  const previousPendingCount = useRef(state.pendingProposals.length)
+  const step = activeQuestionId
+    ? getApplicationStepForQuestion(state, activeQuestionId) ?? suggestedStep
+    : suggestedStep
   const issues = state.validationVisible ? validateApplication(state) : []
+
+  useEffect(() => {
+    if (previousPendingCount.current > 0 && state.pendingProposals.length === 0) {
+      setActiveQuestionId(applicationStore.getStep()?.question.id ?? null)
+    }
+    previousPendingCount.current = state.pendingProposals.length
+  }, [state.pendingProposals.length])
+
+  useEffect(() => {
+    if (previousActiveQuestionId.current !== activeQuestionId) {
+      requestAnimationFrame(() => focusAndReveal(activeQuestionId ? 'focused-question-title' : 'pathway-complete-title', state.assistance.reducedMotion))
+    }
+    previousActiveQuestionId.current = activeQuestionId
+  }, [activeQuestionId, state.assistance.reducedMotion])
+
+  function continueRoute() {
+    const nextQuestionId = applicationStore.getStep()?.question.id ?? null
+    if (nextQuestionId === activeQuestionId) {
+      focusAndReveal('focused-question-title', state.assistance.reducedMotion)
+      return
+    }
+    setActiveQuestionId(nextQuestionId)
+  }
+
   return (
     <section className="assisted-shell" aria-labelledby="pathway-title">
-      <header className="pathway-header">
-        <div><p className="eyebrow">Built from this application</p><h2 id="pathway-title" tabIndex={-1}>Your route through the form</h2><p>Your agent has brought the relevant questions and guidance into one focused route. Confirmed answers decide what is not needed; the council’s rules have not changed.</p></div>
+      <header className="pathway-header" data-focus-region>
+        <div><p className="eyebrow">Focused application</p><h2 id="pathway-title" className="focus-target" tabIndex={-1}>Your route through the form</h2><p>Your agent has brought the relevant questions and guidance into one focused route. Confirmed answers decide what is not needed; the council’s rules have not changed.</p>{state.assistance.keyboardNavigation && <p className="pathway-keyboard-note"><strong>Keyboard route active.</strong> Use Tab between controls and arrow keys within answer choices.</p>}</div>
         <button className="text-button text-button--light" type="button" onClick={() => applicationStore.configure({ active: false }, 'human')}>Return to standard form</button>
       </header>
       <div className="pathway-metrics" aria-label="Personal pathway summary">
@@ -350,7 +392,7 @@ function AssistedExperience() {
       <div className="assisted-grid">
         <div className="focus-workspace">
           {state.validationVisible && issues.length > 0 && <IssueSummary issues={issues} />}
-          {step ? <FocusedQuestion step={step} /> : <PathwayComplete />}
+          {step ? <FocusedQuestion step={step} onContinue={continueRoute} /> : <PathwayComplete />}
         </div>
         <aside className="case-trail">
           <PathwayMap />
@@ -365,8 +407,8 @@ function AssistedExperience() {
 function ProposalQueue() {
   const state = applicationStore.getSnapshot()
   return (
-    <section className="proposal-queue" aria-labelledby="proposal-title">
-      <header><span className="agent-orb" aria-hidden="true">A</span><div><p className="eyebrow">Answers waiting for you</p><h3 id="proposal-title" tabIndex={-1}>Check {state.pendingProposals.length} suggested answers</h3><p>Your agent matched details you gave against the form. Nothing changes until you accept it.</p></div><span className="human-only">Your decision</span></header>
+    <section className="proposal-queue" aria-labelledby="proposal-title" data-focus-region>
+      <header><span className="agent-orb" aria-hidden="true">A</span><div><p className="eyebrow">Answers waiting for you</p><h3 id="proposal-title" className="focus-target" tabIndex={-1}>Check {state.pendingProposals.length} suggested answers</h3><p>Your agent matched details you gave against the form. Nothing changes until you accept it.</p></div><span className="human-only">Your decision</span></header>
       <div className="proposal-list">
         {state.pendingProposals.map((proposal) => {
           const question = getQuestion(proposal.questionId)
@@ -379,30 +421,31 @@ function ProposalQueue() {
           )
         })}
       </div>
-      {state.pendingProposals.length > 1 && <div className="proposal-bulk"><p>Use this only after checking every suggestion.</p><button className="button button--human" type="button" onClick={() => applicationStore.confirmAllAgentProposals()}>Use all checked answers</button></div>}
+      {state.pendingProposals.length > 1 && <div className="proposal-bulk"><p>Only use this after reading every suggestion.</p><button className="button button--human" type="button" onClick={() => applicationStore.confirmAllAgentProposals()}>Accept all {state.pendingProposals.length} suggestions</button></div>}
     </section>
   )
 }
 
-function FocusedQuestion({ step }: { step: NonNullable<ReturnType<typeof getApplicationStep>> }) {
+function FocusedQuestion({ step, onContinue }: { step: NonNullable<ReturnType<typeof getApplicationStep>>; onContinue: () => void }) {
   const state = applicationStore.getSnapshot()
   const pathway = getPathway(state)
   const position = pathway.relevantQuestionIds.indexOf(step.question.id) + 1
-  const issue = state.validationVisible ? step.issue ?? undefined : undefined
+  const issue = state.validationVisible || step.reason === 'needs-correction' ? step.issue ?? undefined : undefined
+  const hasAnswer = step.currentValue !== null && String(step.currentValue).trim().length > 0
   return (
-    <section className="focus-card" aria-labelledby="focused-question-title">
+    <section className="focus-card" aria-labelledby="focused-question-title" data-focus-region>
       <div className="focus-card__meta"><span>{step.sectionTitle}</span><span>Question {position} of {pathway.relevantQuestionIds.length}</span></div>
       <div className="focus-progress" role="progressbar" aria-label={`${pathway.answeredRelevant} of ${pathway.relevantQuestionIds.length} relevant answers complete`} aria-valuemin={0} aria-valuemax={pathway.relevantQuestionIds.length} aria-valuenow={pathway.answeredRelevant}><span style={{ width: `${(pathway.answeredRelevant / pathway.relevantQuestionIds.length) * 100}%` }} /></div>
-      <p className="why-asked"><strong>Why you are seeing this</strong>{step.whyAsked}</p>
-      <div id="focused-question-title"><QuestionField question={step.question} issue={issue} emphasized /></div>
+      {state.assistance.plainLanguage && <p className="why-asked"><strong>Why you are seeing this</strong>{step.whyAsked}</p>}
+      <div id="focused-question-title" className="focus-target" tabIndex={-1}><QuestionField question={step.question} issue={issue} emphasized /></div>
       {step.question.requirementId && <RequirementCard requirementId={step.question.requirementId} />}
-      <div className="form-actions"><button className="button button--primary" type="button" onClick={() => applicationStore.runValidation('human')}>Check my route</button><span>We will take you to the next answer that needs attention.</span></div>
+      <div className="form-actions"><button className="button button--primary" type="button" disabled={!hasAnswer} onClick={onContinue}>Continue</button><span>Your route updates from the answers you confirm.</span></div>
     </section>
   )
 }
 
 function PathwayComplete() {
-  return <section className="focus-card focus-card--complete"><span className="complete-mark" aria-hidden="true">✓</span><p className="eyebrow">Route complete</p><h3>Your application passes every check</h3><p>Read through your answers before making the declaration and submitting the demonstration application.</p><button className="button button--primary" type="button" onClick={() => applicationStore.openReview()}>Review my answers</button></section>
+  return <section className="focus-card focus-card--complete" data-focus-region><span className="complete-mark" aria-hidden="true">✓</span><p className="eyebrow">Route complete</p><h3 id="pathway-complete-title" className="focus-target" tabIndex={-1}>Your application passes every check</h3><p>You have answered every question and made the declaration. Read through everything once more before submitting.</p><button className="button button--primary" type="button" onClick={() => applicationStore.openReview()}>Review my answers</button></section>
 }
 
 function QuestionField({ question, issue, emphasized = false }: { question: QuestionDefinition; issue?: ValidationIssue; emphasized?: boolean }) {
@@ -453,7 +496,7 @@ function IssueSummary({ issues }: { issues: readonly ValidationIssue[] }) {
 
 function RequirementCard({ requirementId }: { requirementId: keyof typeof requirements }) {
   const requirement = requirements[requirementId]
-  return <details className="requirement-card" open={applicationStore.getSnapshot().assistance.plainLanguage}><summary>Council rule: {requirement.title}</summary><div><strong>{requirement.officialRule}</strong><p>{requirement.plainLanguage}</p><small>What counts as evidence: {requirement.evidence}</small></div></details>
+  return <details className="requirement-card"><summary>Council rule and evidence: {requirement.title}</summary><div><strong>{requirement.officialRule}</strong><small>What counts as evidence: {requirement.evidence}</small></div></details>
 }
 
 function PathwayMap() {
@@ -469,23 +512,33 @@ function EvidencePlan() {
 
 function ActivityTrail() {
   const history = applicationStore.getSnapshot().history
-  return <section className="rail-card"><p className="eyebrow">What changed</p><h3>Activity</h3>{history.length === 0 ? <p>No changes have been made.</p> : <ol className="activity-list">{history.slice(-7).reverse().map((entry) => <li key={entry.id} data-actor={entry.actor}><span aria-hidden="true">{entry.actor === 'agent' ? 'A' : entry.actor === 'human' ? 'Y' : 'R'}</span><div><strong>{entry.action}</strong><small>{entry.detail}</small></div></li>)}</ol>}</section>
+  const confirmations = history.filter((entry) => entry.action === 'Agent answer confirmed')
+  const otherEntries = history.filter((entry) => entry.action !== 'Agent answer confirmed')
+  const displayEntries = confirmations.length > 1
+    ? [...otherEntries, {
+        id: confirmations.at(-1)?.id ?? 0,
+        actor: 'human' as const,
+        action: `${confirmations.length} suggestions accepted`,
+        detail: 'The proposed answers were added after human review.',
+      }]
+    : history
+  return <section className="rail-card"><p className="eyebrow">What changed</p><h3>Activity</h3>{displayEntries.length === 0 ? <p>No changes have been made.</p> : <ol className="activity-list">{[...displayEntries].sort((a, b) => b.id - a.id).slice(0, 7).map((entry) => <li key={entry.id} data-actor={entry.actor}><span aria-hidden="true">{entry.actor === 'agent' ? 'A' : entry.actor === 'human' ? 'Y' : 'R'}</span><div><strong>{entry.action}</strong><small>{entry.detail}</small></div></li>)}</ol>}</section>
 }
 
 function ReviewPanel() {
   const review = applicationStore.getReview()
   return (
-    <section className="review-panel" aria-labelledby="review-title">
-      <p className="eyebrow">Final review</p><h1 id="review-title">Review your answers</h1>
+    <section className="review-panel" aria-labelledby="review-title" data-focus-region>
+      <p className="eyebrow">Final review</p><h1 id="review-title" className="focus-target" tabIndex={-1}>Review your answers</h1>
       <div className="review-boundary"><strong>Only you can submit this application.</strong><span>Your agent can check this page, but the website gives it no submission tool.</span></div>
       <dl>{review.answers.map((item) => <div key={item.questionId}><dt>{item.label}</dt><dd>{item.value}</dd></div>)}</dl>
-      <div className="review-actions"><button className="button button--primary" type="button" onClick={() => applicationStore.submit()}>Submit fictional application</button><button className="text-button" type="button" onClick={() => applicationStore.configure({ active: true }, 'human')}>Return to application</button></div>
+      <div className="review-actions"><button className="button button--primary" type="button" onClick={() => applicationStore.submit()}>Submit fictional application</button><button className="text-button" type="button" onClick={() => applicationStore.returnToApplication()}>Return to application</button></div>
     </section>
   )
 }
 
 function SuccessPanel() {
-  return <section className="success-panel"><span className="complete-mark" aria-hidden="true">✓</span><p className="eyebrow">Demonstration complete</p><h1>Application received</h1><p>Your reference is <strong>ALD-DEMO-2047</strong>. Nothing was sent to a real council.</p><button className="button button--primary" type="button" onClick={() => applicationStore.reset()}>Start again</button></section>
+  return <section className="success-panel" data-focus-region><span className="complete-mark" aria-hidden="true">✓</span><p className="eyebrow">Demonstration complete</p><h1 id="success-title" className="focus-target" tabIndex={-1}>Application received</h1><p>Your reference is <strong>ALD-DEMO-2047</strong>. Nothing was sent to a real council.</p><button className="button button--primary" type="button" onClick={() => applicationStore.reset()}>Start again</button></section>
 }
 
 function SiteFooter() {
