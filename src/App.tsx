@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { applicationStore } from './applicationStore'
 import {
   formatAnswer,
@@ -75,7 +75,7 @@ export default function App() {
     previousProposalCount.current = state.pendingProposals.length
   }, [state.assistance.reducedMotion, state.pendingProposals.length])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (previousScreen.current !== state.screen) {
       const target = state.screen === 'review'
         ? 'review-title'
@@ -84,7 +84,11 @@ export default function App() {
           : state.assistance.active
             ? 'pathway-title'
             : 'page-title'
-      requestAnimationFrame(() => focusAndReveal(target, state.assistance.reducedMotion))
+      if (state.screen === 'review' || state.screen === 'submitted') {
+        focusAtPageStart(target)
+      } else {
+        requestAnimationFrame(() => focusAndReveal(target, state.assistance.reducedMotion))
+      }
     }
     previousScreen.current = state.screen
   }, [state.assistance.active, state.assistance.reducedMotion, state.screen])
@@ -106,6 +110,14 @@ export default function App() {
       <div className="sr-only" aria-live="polite" aria-atomic="true">{state.announcement}</div>
     </div>
   )
+}
+
+function focusAtPageStart(id: string) {
+  const element = document.getElementById(id)
+  if (!element) return
+  element.focus({ preventScroll: true })
+  window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+  requestAnimationFrame(() => window.scrollTo({ top: 0, left: 0, behavior: 'auto' }))
 }
 
 function focusAndReveal(id: string, reducedMotion: boolean) {

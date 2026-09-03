@@ -8,6 +8,7 @@ import {
   createInitialState,
   demoAgentProposals,
   getApplicationReview,
+  getApplicationStep,
   getApplicationStepForQuestion,
   getPathway,
   openReview,
@@ -121,6 +122,18 @@ describe('schema-driven form contract', () => {
       currentValue: 'AW2 4LA',
       reason: 'complete',
       issue: null,
+    })
+  })
+
+  it('handles an invalid but non-empty answer in an otherwise complete route', () => {
+    const state = setHumanAnswer(withAnswers(), 'contractor_name', 'A')
+
+    expect(() => getPathway(state)).not.toThrow()
+    expect(getApplicationStep(state)).toMatchObject({
+      question: { id: 'contractor_name' },
+      currentValue: 'A',
+      reason: 'needs-correction',
+      issue: { code: 'min_length_contractor_name' },
     })
   })
 })

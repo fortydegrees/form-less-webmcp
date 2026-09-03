@@ -458,8 +458,8 @@ export function getApplicationStep(state: ApplicationState): ApplicationStep | n
 }
 
 export function getApplicationStepForQuestion(state: ApplicationState, questionId: QuestionId): ApplicationStep | null {
-  if (!getPathway(state).relevantQuestionIds.includes(questionId)) return null
   const question = getQuestion(questionId)
+  if (!isQuestionApplicable(question, state.answers)) return null
   const questionIssue = validateApplication(state).find((candidate) => candidate.questionId === questionId) ?? null
   const section = sections.find((candidate) => candidate.questions.includes(question.id))
   const requirement = question.requirementId ? requirements[question.requirementId] : undefined
