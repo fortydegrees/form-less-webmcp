@@ -2,36 +2,45 @@
 
 [![Test, lint, build and deploy](https://github.com/fortydegrees/right-questions-webmcp/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/fortydegrees/right-questions-webmcp/actions/workflows/deploy-pages.yml)
 
-**The website knows the rules. Your agent knows you. Together they produce the
-right interface.**
+**An entry for the [OpenAI WebMCP Hackathon](https://webmcp.devpost.com/).**
 
-Right Questions demonstrates a WebMCP pattern for public services. A fictional
-council application has 34 possible questions, nested pathways, evidence
-requirements and deterministic policy checks. A visitor's agent can inspect
-that structure and ask the site to assemble a focused pathway for their
-circumstances.
+A public-service form can be well designed and still ask one person to navigate
+every possible route. Right Questions lets a visitor's agent read the site's
+own form structure and turn a 34-question council application into a shorter,
+relevant route.
 
-The website still owns the rules and interface. The applicant still owns every
-answer, the declaration and submission.
+The council site keeps control of its rules, validation and interface. The
+applicant keeps control of their answers and the final submission.
 
 [Try the live application](https://fortydegrees.github.io/right-questions-webmcp/)
 
-![The focused Right Questions pathway showing 34 possible questions reduced to 16, with 18 questions not needed](docs/assets/personal-pathway.jpg)
+## Before and after
+
+<table>
+  <tr>
+    <th width="50%">Before: the complete service</th>
+    <th width="50%">After: this applicant's route</th>
+  </tr>
+  <tr>
+    <td><img src="docs/assets/standard-application.jpg" alt="The complete application showing ownership choices and conditional follow-up groups"></td>
+    <td><img src="docs/assets/personal-pathway.jpg" alt="The focused pathway showing 34 possible questions reduced to 16, with 18 questions not needed"></td>
+  </tr>
+  <tr>
+    <td>Five sections covering every ownership, finance, repair and evidence branch.</td>
+    <td>Only the relevant questions, with known facts ready for the applicant to review.</td>
+  </tr>
+</table>
 
 ## What changes
 
-- **34 possible questions → 16 on the canonical route → 18 not needed** once
+- **34 possible questions → 16 on the demo route → 18 not needed** once
   the applicant confirms the routing choices.
 - **10 answers proposed → 0 stored** until the applicant reviews and accepts
   them.
 - **6 WebMCP tools → 0 submission tools.** The agent can inspect, adapt,
   explain, propose, validate and review. It cannot declare or submit.
 
-This is not an AI form filler or an arbitrary page reskin. It is a cooperating
-website exposing its own structure, rules and approved layouts to an external
-agent.
-
-## Judge walkthrough
+## Try it with ChatGPT
 
 Use the ChatGPT desktop built-in browser with Site Tools enabled:
 
@@ -46,8 +55,8 @@ Use the ChatGPT desktop built-in browser with Site Tools enabled:
    > days ago. There is no heating or hot water. I have a £2,450 written
    > estimate but no photos.
 
-4. Watch the site switch from the complete application to its approved focused
-   layout. Ten suggested answers appear, while every current answer remains
+4. The site switches from the complete application to its focused layout. Ten
+   suggested answers appear, while every current answer remains
    visibly **Not answered**.
 5. Review and accept the suggestions in the webpage. The site recalculates the
    pathway and removes branches that do not apply.
@@ -55,31 +64,24 @@ Use the ChatGPT desktop built-in browser with Site Tools enabled:
    rules and deterministic issues, but it cannot make the declaration or press
    **Submit application**.
 
-Chrome 146 or later can also expose the tools with **WebMCP for testing**
-enabled, but the flag provides the API rather than an agent. If Site Tools are
-unavailable, the complete human form remains usable.
-
-## Before and after
-
-The ordinary service is intentionally competent, but it must represent every
-ownership, financial, repair and evidence route. Unresolved conditions are
-shown as real form work rather than hidden behind a question counter.
-
-![A section of the complete application showing ownership choices and several conditional follow-up groups](docs/assets/standard-application.jpg)
-
-The agent then stages facts the applicant has already supplied. Nothing enters
+The agent only stages facts the applicant has already supplied. Nothing enters
 the application until the person accepts each suggestion.
 
 ![Ten suggested answers awaiting human confirmation, with every current answer still shown as not answered](docs/assets/proposals-awaiting-confirmation.png)
 
-## Why WebMCP
+Chrome 146 or later can also expose the tools with **WebMCP for testing**
+enabled, although the flag provides the API rather than an agent. The complete
+human form still works when Site Tools are unavailable.
+
+## What WebMCP is doing
 
 Without WebMCP, an agent must repeatedly inspect page content, infer conditional
 relationships, track DOM changes and guess which actions have side effects.
-Right Questions instead returns typed questions, current values, allowed
-answers, conditions, official explanations and explicit authority boundaries.
+Here it gets typed questions, current values, allowed answers, conditions,
+site-written explanations and explicit authority boundaries.
 
-One contract drives four consumers:
+The same form contract is used by the normal UI, the focused UI, validation and
+the WebMCP tools:
 
 - [`src/form.schema.json`](src/form.schema.json) defines the 34 fields, types,
   allowed values, constraints, conditional applicability and agent-write
@@ -88,13 +90,13 @@ One contract drives four consumers:
   the council-approved focused layout.
 - [`src/form.rules.json`](src/form.rules.json) contains fictional official
   requirements and cross-field checks.
-- [`src/formDefinition.ts`](src/formDefinition.ts) is the typed adapter shared
-  by the standard UI, adaptive UI, domain engine and WebMCP tools.
+- [`src/formDefinition.ts`](src/formDefinition.ts) connects those files to the
+  standard UI, focused UI, domain engine and WebMCP tools.
 
 See [`docs/architecture.md`](docs/architecture.md) for the state and authority
 model.
 
-## WebMCP tools
+### The six tools
 
 - `inspect_application` returns the full structured contract and current state.
 - `configure_assistance` activates approved presentation preferences without
@@ -105,8 +107,8 @@ model.
 - `get_application_review` returns the live pathway, answers, issues and the
   explicit human-only submission boundary.
 
-There is deliberately no `submit_application` tool. The applicant declaration
-is also excluded from every agent-writable schema.
+There is no `submit_application` tool. The declaration is excluded from every
+agent-writable schema too.
 
 ## Run locally
 
@@ -140,9 +142,10 @@ GitHub Pages.
 - Vitest coverage for schema integrity, branching, policy rules, proposal
   consent, generated tool schemas and the absent submission capability.
 
-Codex was the implementation partner for the application, tests and QA. Product
-scope, the applicant scenario, authority boundaries and release decisions were
-human-directed. No model or external API runs inside the shipped product.
+Built with Codex as the implementation partner for the application, tests and
+QA. The product idea, applicant scenario, authority boundaries and release
+decisions were human-directed. No model or external API runs inside the shipped
+site.
 
 Alderwick Council and every policy, applicant detail and reference number in
 the demo are fictional. Right Questions is not a real application or source of
