@@ -1,6 +1,4 @@
-# Civic Adaptive WebMCP
-
-> Competition-build codename; final public name pending.
+# Right Questions
 
 **The website knows the rules. Your agent knows you. Together they produce the
 right interface.**

@@ -48,7 +48,7 @@ human-authorised action.
 
 ## Proposed field values
 
-Project name: `[FINAL NAME]`
+Project name: `Right Questions`
 
 Elevator pitch (165/200 characters):
 

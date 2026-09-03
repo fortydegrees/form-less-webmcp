@@ -1,14 +1,14 @@
-# Civic Adaptive WebMCP — Source of Truth
+# Right Questions — Source of Truth
 
 Status: active competition build  
-Internal codename only: David will choose the submission name.  
+Public project name: Right Questions.
 Deadline: 3 September 2026, 21:00 BST. Target submission: 19:00 BST.
 
 ## Current phase
 
 The product and WebMCP architecture are feature-complete. Work is now
 video-first release closeout: freeze the judge story, make only changes required
-by a specific shot or release gate, choose the public name, deploy the approved
+by a specific shot or release gate, deploy the approved
 branch, capture runtime proof, record the narrated demo, and complete Devpost.
 
 The TasteSkill presentation candidate lives on `experiment/taste-skill`; its
