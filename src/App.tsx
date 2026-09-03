@@ -6,7 +6,6 @@ import {
   getPathway,
   getQuestion,
   isQuestionApplicable,
-  questions,
   requirements,
   sections,
   validateApplication,
@@ -227,13 +226,19 @@ function KeyboardNote() {
 function StandardExperience() {
   const state = applicationStore.getSnapshot()
   const issues = state.validationVisible ? validateApplication(state) : []
-  const applicable = questions.filter((question) => isQuestionApplicable(question, state.answers))
-  const answered = getPathway(state).answeredRelevant
   return (
     <div className="standard-shell" id="application-form">
       <div className="standard-intro">
-        <div><p className="eyebrow">Full application</p><h2>Apply for repair support</h2><p>This service can ask up to {questions.length} questions across five sections. Your answers determine which ownership, financial, repair and evidence branches appear.</p></div>
-        <div className="completion"><strong>{questions.length}</strong><span>possible questions</span><small>{answered}/{applicable.length} on the current route answered</small></div>
+        <div><p className="eyebrow">Full application</p><h2>Apply for repair support</h2><p>Complete all five sections. Some questions will appear only after you tell us about your ownership, household finances and the repair.</p></div>
+        <aside className="before-start" aria-labelledby="before-start-title">
+          <strong id="before-start-title">Before you start</strong>
+          <span>Have these ready if they apply:</span>
+          <ul>
+            <li>proof of ownership or permission</li>
+            <li>benefit or household income evidence</li>
+            <li>a written estimate and photographs</li>
+          </ul>
+        </aside>
       </div>
       <div className="standard-grid">
         <aside className="section-nav" aria-label="Application sections">

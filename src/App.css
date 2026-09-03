@@ -60,14 +60,15 @@
 .keyboard-note strong { margin-right: 6px; }
 
 .standard-shell { scroll-margin-top: 20px; background: transparent; }
-.standard-intro { display: grid; grid-template-columns: 1fr auto; gap: 40px; align-items: center; padding: 28px 0 26px; border-block: 4px solid var(--service); }
+.standard-intro { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 380px); gap: 48px; align-items: start; padding: 28px 0 26px; border-block: 4px solid var(--service); }
 .standard-intro h2, .pathway-header h2 { margin: 0 0 8px; color: var(--midnight); font-size: clamp(1.8rem, 3vw, 2.7rem); font-weight: 760; line-height: 1.08; letter-spacing: -.03em; text-wrap: balance; }
 .standard-intro p { max-width: 670px; margin: 0; color: var(--muted); line-height: 1.55; }
-.completion { min-width: 150px; padding-left: 26px; border-left: 1px solid var(--line-strong); }
-.completion strong, .completion span, .completion small { display: block; }
-.completion strong { color: var(--service); font-size: 1.9rem; font-weight: 760; font-variant-numeric: tabular-nums; }
-.completion span { max-width: 110px; color: var(--muted); font-size: .76rem; line-height: 1.35; }
-.completion small { max-width: 140px; margin-top: 7px; color: var(--muted); font-size: .67rem; line-height: 1.4; }
+.before-start { padding-left: 24px; border-left: 1px solid var(--line-strong); }
+.before-start strong, .before-start span { display: block; }
+.before-start strong { margin-bottom: 4px; color: var(--midnight); font-size: .88rem; }
+.before-start span { color: var(--muted); font-size: .76rem; }
+.before-start ul { margin: 10px 0 0; padding-left: 18px; color: var(--ink); font-size: .76rem; line-height: 1.55; }
+.before-start li + li { margin-top: 4px; }
 .standard-grid { display: grid; grid-template-columns: 240px minmax(0, 1fr); background: white; box-shadow: var(--shadow-sm); }
 .section-nav { position: sticky; top: 20px; align-self: start; padding: 30px 24px; border-right: 1px solid var(--line); background: #f4f7f8; }
 .section-nav > p { margin: 0 0 13px; color: var(--muted); font-size: .76rem; font-weight: 720; }
@@ -272,7 +273,7 @@
   .hero h1 { font-size: clamp(2.25rem, 11vw, 3.2rem); }
   .lede { font-size: 1rem; }
   .standard-intro { grid-template-columns: 1fr; padding: 24px 0; }
-  .completion { padding: 15px 0 0; border-top: 1px solid var(--line); border-left: 0; }
+  .before-start { padding: 18px 0 0; border-top: 1px solid var(--line); border-left: 0; }
   .standard-form { padding: 26px 20px 38px; }
   .form-section > header { grid-template-columns: 30px 1fr; }
   .form-section__fields { padding-left: 0; }
