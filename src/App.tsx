@@ -247,7 +247,6 @@ function StandardExperience() {
           <ol>{sections.map((section, index) => <li key={section.id}><a href={`#section-${section.id}`}><span>{String(index + 1).padStart(2, '0')}</span>{section.title}</a></li>)}</ol>
         </aside>
         <form className="standard-form" onSubmit={(event) => { event.preventDefault(); applicationStore.runValidation('human') }} noValidate>
-          <div className="safety-note"><strong>If anyone is in immediate danger</strong>Leave the property and contact the emergency services. This demonstration service cannot arrange emergency help.</div>
           {state.validationVisible && <IssueSummary issues={issues} />}
           {sections.map((section, sectionIndex) => {
             const sectionQuestions = section.questions.map(getQuestion).filter((question) => isQuestionApplicable(question, state.answers))

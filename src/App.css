@@ -78,8 +78,6 @@
 .section-nav a:hover { color: var(--service); }
 .section-nav a span { color: var(--service); font-family: var(--font-mono); font-size: .7rem; }
 .standard-form { min-width: 0; padding: 34px 42px 50px; }
-.safety-note { margin-bottom: 32px; padding: 16px 18px; border-left: 4px solid var(--issue); background: var(--issue-soft); color: var(--issue-dark); line-height: 1.48; }
-.safety-note strong { display: block; margin-bottom: 3px; }
 .form-section { scroll-margin-top: 24px; padding: 0 0 44px; }
 .form-section + .form-section { padding-top: 42px; border-top: 1px solid var(--line-strong); }
 .form-section > header { display: grid; grid-template-columns: 40px 1fr; gap: 14px; margin-bottom: 26px; }
