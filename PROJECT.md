@@ -104,6 +104,8 @@ There is deliberately no `submit_application` tool.
 - Visible multi-answer proposals with individual and reviewed-batch human
   confirmation.
 - Browser-native WebMCP registration with useful unsupported-browser fallback.
+- Product-first council presentation with an accessible WebMCP judge panel for
+  connection status, tool roles, the canonical prompt, and authority boundaries.
 - Keyboard focus choreography, semantic controls, error associations, live
   announcements, reduced-motion support, and 320px+ reflow.
 - Public static deployment, repository, MIT licence, README, screenshots, and a

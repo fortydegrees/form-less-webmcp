@@ -46,7 +46,8 @@ the deployed build.
 Use Chrome 146+ with `chrome://flags/#enable-webmcp-testing` enabled and Chrome
 fully relaunched.
 
-- [ ] App reports `WebMCP ready · 6 tools · 0 submission tools`.
+- [ ] Header badge opens a keyboard-accessible dialog reporting native status,
+      six tools, and zero submission tools.
 - [ ] `document.modelContext.getTools()` returns exactly:
   - `inspect_application`
   - `configure_assistance`

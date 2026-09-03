@@ -13,7 +13,7 @@ import {
   type QuestionDefinition,
   type ValidationIssue,
 } from './domain'
-import { registerWebMcpTools } from './webmcp'
+import { registerWebMcpTools, webMcpTools } from './webmcp'
 import './App.css'
 
 type WebMcpStatus = 'checking' | 'supported' | 'unsupported' | 'error'
@@ -45,6 +45,7 @@ function useWebMcpRegistration(): WebMcpStatus {
 export default function App() {
   const state = useSyncExternalStore(applicationStore.subscribe, applicationStore.getSnapshot)
   const webMcpStatus = useWebMcpRegistration()
+  const [toolsOpen, setToolsOpen] = useState(false)
   const previousAssistance = useRef(state.assistance.active)
   const previousProposalCount = useRef(state.pendingProposals.length)
 
@@ -76,18 +77,18 @@ export default function App() {
     <div className="app-shell" data-assisted={state.assistance.active || undefined} data-reduced-motion={state.assistance.reducedMotion || undefined}>
       <a className="skip-link" href="#main-content">Skip to application</a>
       <PrototypeBanner />
-      <SiteHeader />
+      <SiteHeader status={webMcpStatus} onOpenTools={() => setToolsOpen(true)} />
       <main id="main-content" className="page-width main-content">
         {state.screen === 'submitted' ? <SuccessPanel /> : state.screen === 'review' ? <ReviewPanel /> : (
           <>
-            <Hero status={webMcpStatus} assisted={state.assistance.active} />
-            <AuthorityStrip />
+            <Hero assisted={state.assistance.active} />
             {state.assistance.keyboardNavigation && <KeyboardNote />}
             {state.assistance.active ? <AssistedExperience /> : <StandardExperience />}
           </>
         )}
       </main>
       <SiteFooter />
+      <AgentToolsDialog open={toolsOpen} status={webMcpStatus} onClose={() => setToolsOpen(false)} />
       <div className="sr-only" aria-live="polite" aria-atomic="true">{state.announcement}</div>
     </div>
   )
@@ -105,52 +106,117 @@ function PrototypeBanner() {
   return <div className="prototype-banner"><div className="page-width"><strong>Demonstration service</strong><span>Alderwick is fictional. Nothing you enter leaves this page.</span></div></div>
 }
 
-function SiteHeader() {
+function SiteHeader({ status, onOpenTools }: { status: WebMcpStatus; onOpenTools: () => void }) {
+  const statusLabel = status === 'supported' ? 'connected' : status === 'checking' ? 'connecting' : 'unavailable'
   return (
     <header className="site-header">
       <div className="page-width site-header__inner">
         <a className="brand" href="#main-content"><span className="brand__mark" aria-hidden="true">A</span><span><strong>Alderwick Council</strong><small>Housing support</small></span></a>
-        <span className="case-reference">Application <strong>AW–0247</strong></span>
-        <button className="text-button" type="button" onClick={() => applicationStore.reset()}>Reset demo</button>
+        <div className="site-header__actions">
+          <span className="case-reference">Application <strong>AW–0247</strong></span>
+          <button className={`webmcp-button webmcp-button--${status}`} type="button" onClick={onOpenTools} aria-haspopup="dialog" aria-label={`WebMCP information: ${statusLabel}, ${webMcpTools.length} tools`}>
+            <span className="webmcp-dot" aria-hidden="true" />
+            <span>WebMCP</span>
+            <small>{webMcpTools.length} tools</small>
+          </button>
+          <button className="text-button" type="button" onClick={() => applicationStore.reset()}>Reset demo</button>
+        </div>
       </div>
     </header>
   )
 }
 
-function Hero({ status, assisted }: { status: WebMcpStatus; assisted: boolean }) {
-  const messages = {
-    checking: 'Checking whether your agent can help…',
-    supported: 'Your browser agent can work with this form',
-    unsupported: 'You can complete this form without an agent',
-    error: 'Agent support could not start',
-  }
+function Hero({ assisted }: { assisted: boolean }) {
   return (
     <section className="hero" aria-labelledby="page-title">
       <div>
         <p className="eyebrow">Urgent home repair grant</p>
         <h1 id="page-title">Get help with an urgent repair to your home</h1>
-        <p className="lede">Apply for help with essential heating, electrical, structural or water-damage work. Complete the full form yourself, or ask your browser agent to find the shorter route that fits your circumstances.</p>
+        <p className="lede">Apply for help with essential heating, electrical, structural or water-damage work. Your answers determine which questions and evidence apply to your home.</p>
         {!assisted && <a className="start-link" href="#application-form">Start the full application</a>}
-      </div>
-      <div className={`connection-card connection-card--${status}`}>
-        <span className="agent-orb" aria-hidden="true">✦</span>
-        <div><strong>{messages[status]}</strong><span>{status === 'supported' ? '6 structured site tools available · no submission tool' : 'Every question and check remains available on this page.'}</span></div>
-      </div>
-      <div className="demo-prompt">
-        <span>Try asking your agent</span>
-        <blockquote>“{canonicalPrompt}”</blockquote>
       </div>
     </section>
   )
 }
 
-function AuthorityStrip() {
+function AgentToolsDialog({ open, status, onClose }: { open: boolean; status: WebMcpStatus; onClose: () => void }) {
+  const dialogRef = useRef<HTMLDialogElement>(null)
+  const [copied, setCopied] = useState(false)
+  const statusCopy = {
+    checking: 'Connecting to native browser WebMCP…',
+    supported: 'Native browser WebMCP is connected',
+    unsupported: 'WebMCP is not available in this browser',
+    error: 'WebMCP could not connect',
+  }
+
+  useEffect(() => {
+    const dialog = dialogRef.current
+    if (!dialog) return
+    if (open && !dialog.open) dialog.showModal()
+    if (!open && dialog.open) dialog.close()
+  }, [open])
+
+  function closeDialog() {
+    setCopied(false)
+    onClose()
+  }
+
+  async function copyPrompt() {
+    try {
+      await navigator.clipboard.writeText(canonicalPrompt)
+      setCopied(true)
+    } catch {
+      setCopied(false)
+    }
+  }
+
   return (
-    <section className="authority-strip" aria-label="Application authority">
-      <div className="authority authority--agent"><span aria-hidden="true">A</span><div><small>Your agent can</small><strong>Read the form, narrow your route and suggest answers</strong></div></div>
-      <div className="authority authority--human"><span aria-hidden="true">Y</span><div><small>Only you can</small><strong>Accept an answer, make the declaration and submit</strong></div></div>
-      <div className="authority authority--service"><span aria-hidden="true">R</span><div><small>Council rules</small><strong>Decide what applies and check the application</strong></div></div>
-    </section>
+    <dialog
+      ref={dialogRef}
+      className="tools-dialog"
+      aria-labelledby="tools-dialog-title"
+      aria-describedby="tools-dialog-description"
+      onClose={closeDialog}
+      onCancel={(event) => { event.preventDefault(); closeDialog() }}
+      onClick={(event) => { if (event.target === event.currentTarget) closeDialog() }}
+    >
+      <div className="tools-dialog__surface">
+        <header className="tools-dialog__header">
+          <div>
+            <p className="eyebrow">Agent tools for this service</p>
+            <h2 id="tools-dialog-title">This application supports WebMCP</h2>
+            <p id="tools-dialog-description">A compatible browser agent can read the form contract, request the council-approved focused layout, suggest answers and run official checks.</p>
+          </div>
+          <button className="dialog-close" type="button" onClick={closeDialog} aria-label="Close WebMCP information">×</button>
+        </header>
+
+        <div className={`tools-status tools-status--${status}`} role="status">
+          <span className="webmcp-dot" aria-hidden="true" />
+          <strong>{statusCopy[status]}</strong>
+          <span>{webMcpTools.length} tools · 0 submission tools</span>
+        </div>
+
+        <ol className="tools-list" aria-label="Available WebMCP tools">
+          {webMcpTools.map((tool) => (
+            <li key={tool.name}>
+              <span className="tool-code" aria-hidden="true">&lt;/&gt;</span>
+              <div><code>{tool.name}</code><span>{tool.title}</span></div>
+              <small>{tool.name === 'propose_answers' ? 'Stages proposals' : tool.annotations?.readOnlyHint ? 'Read only' : 'Changes presentation'}</small>
+            </li>
+          ))}
+        </ol>
+
+        <section className="demo-instruction" aria-labelledby="demo-prompt-title">
+          <div className="demo-instruction__heading"><div><p className="eyebrow">Try the complete journey</p><h3 id="demo-prompt-title">Ask your agent</h3></div><button className="copy-button" type="button" onClick={() => void copyPrompt()}>{copied ? 'Copied' : 'Copy prompt'}</button></div>
+          <blockquote>{canonicalPrompt}</blockquote>
+        </section>
+
+        <div className="tools-boundary">
+          <div><strong>Your agent can</strong><span>Inspect, adapt, explain, propose and check.</span></div>
+          <div><strong>Only you can</strong><span>Accept answers, make the declaration and submit.</span></div>
+        </div>
+      </div>
+    </dialog>
   )
 }
 
@@ -230,7 +296,6 @@ function AssistedExperience() {
           <PathwayMap />
           <EvidencePlan />
           <ActivityTrail />
-          <SchemaProof />
         </aside>
       </div>
     </section>
@@ -347,10 +412,6 @@ function ActivityTrail() {
   return <section className="rail-card"><p className="eyebrow">What changed</p><h3>Activity</h3>{history.length === 0 ? <p>No changes have been made.</p> : <ol className="activity-list">{history.slice(-7).reverse().map((entry) => <li key={entry.id} data-actor={entry.actor}><span aria-hidden="true">{entry.actor === 'agent' ? 'A' : entry.actor === 'human' ? 'Y' : 'R'}</span><div><strong>{entry.action}</strong><small>{entry.detail}</small></div></li>)}</ol>}</section>
 }
 
-function SchemaProof() {
-  return <section className="schema-proof"><p className="eyebrow">How this page works</p><ul><li><strong>JSON Schema</strong><span>{questions.length} questions and constraints</span></li><li><strong>UI schema</strong><span>{sections.length} sections and an adaptive layout</span></li><li><strong>Council rules</strong><span>{Object.keys(requirements).length} published requirements</span></li><li><strong>WebMCP</strong><span>6 site tools · no submit tool</span></li></ul></section>
-}
-
 function ReviewPanel() {
   const review = applicationStore.getReview()
   return (
@@ -368,5 +429,5 @@ function SuccessPanel() {
 }
 
 function SiteFooter() {
-  return <footer className="site-footer"><div className="page-width"><strong>Alderwick Council</strong><span>The website knows the rules. Your agent knows you. Together they build the right interface.</span></div></footer>
+  return <footer className="site-footer"><div className="page-width"><strong>Alderwick Council</strong><span>Fictional housing support demonstration</span></div></footer>
 }

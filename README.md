@@ -53,6 +53,10 @@ among those capabilities using context the website does not already have.
 There is no submission tool. Unsupported browsers retain the complete standard
 human workflow.
 
+The default page presents as the council service, not as an architecture demo.
+A compact `WebMCP · 6 tools` button opens an optional judge panel with connection
+status, tool roles, the canonical prompt, and the human/agent authority boundary.
+
 ## Local development
 
 ```bash
