@@ -18,7 +18,7 @@ import './App.css'
 type WebMcpStatus = 'checking' | 'supported' | 'unsupported' | 'error'
 
 const canonicalPrompt =
-  'Use this site’s tools, not browser clicks. I use keyboard navigation. I own and live at AW2 4LA, receive Universal Credit, and my boiler failed two days ago. There is no heating or hot water. I have a £2,450 written estimate but no photos. Show me only the questions that apply, explain why they matter, and suggest answers only where I have given you the facts. Do not submit.'
+  'Use this site’s tools, not browser clicks. I use keyboard navigation. I own and live at AW2 4LA, receive Universal Credit, and my boiler failed two days ago. There is no heating or hot water. I have a £2,450 written estimate but no photos.'
 
 function useWebMcpRegistration(): WebMcpStatus {
   const [status, setStatus] = useState<WebMcpStatus>(() =>
