@@ -269,12 +269,55 @@ function StandardExperience() {
 }
 
 function PossibleFollowUps({ questions: possibleQuestions }: { questions: readonly QuestionDefinition[] }) {
+  const groups = new Map<string, QuestionDefinition[]>()
+  for (const question of possibleQuestions) {
+    const condition = question.appliesWhen
+    const values = condition
+      ? 'equals' in condition ? [condition.equals] : condition.in
+      : []
+    const trigger = condition
+      ? `If you answer ${values.map((value) => `“${formatAnswer(condition.field, value)}”`).join(' or ')}`
+      : 'Depending on your earlier answers'
+    groups.set(trigger, [...(groups.get(trigger) ?? []), question])
+  }
+
   return (
-    <aside className="possible-follow-ups" aria-label="Questions that may also apply">
-      <strong>You may also need to answer</strong>
-      <p>Your answers in this section decide whether these questions apply.</p>
-      <ul>{possibleQuestions.map((question) => <li key={question.id}>{question.label}</li>)}</ul>
+    <aside className="possible-follow-ups" aria-label="Conditional questions that may also apply">
+      <header>
+        <strong>Other questions in this section</strong>
+        <p>You may need to complete one of these parts after answering the questions above.</p>
+      </header>
+      <div className="conditional-groups">
+        {[...groups.entries()].map(([trigger, groupQuestions]) => (
+          <section className="conditional-group" key={trigger}>
+            <header><strong>{trigger}</strong><span>{groupQuestions.length} {groupQuestions.length === 1 ? 'question' : 'questions'}</span></header>
+            <div className="conditional-group__questions">
+              {groupQuestions.map((question) => <ConditionalQuestionPreview question={question} key={question.id} />)}
+            </div>
+          </section>
+        ))}
+      </div>
     </aside>
+  )
+}
+
+function ConditionalQuestionPreview({ question }: { question: QuestionDefinition }) {
+  return (
+    <article className="conditional-question">
+      <strong>{question.label}</strong>
+      <p>{question.hint}</p>
+      <div className={`conditional-control conditional-control--${question.input}`} aria-hidden="true">
+        {question.input === 'radio' && question.options
+          ? <>{question.options.slice(0, 2).map((option) => <span className="conditional-choice" key={option.value}><i />{option.label}</span>)}{question.options.length > 2 && <small>+ {question.options.length - 2} more options</small>}</>
+          : question.input === 'select'
+            ? <span className="conditional-input">Select an answer <i>⌄</i></span>
+            : question.input === 'checkbox'
+              ? <span className="conditional-choice"><i />{question.options?.[0]?.label ?? 'Confirm'}</span>
+              : question.input === 'textarea'
+                ? <span className="conditional-textarea" />
+                : <span className="conditional-input">{question.input === 'currency' ? '£' : ''}</span>}
+      </div>
+    </article>
   )
 }
 
