@@ -52,8 +52,7 @@ The agent must call site tools rather than simulate clicks.
 > Use this site's tools—not browser clicks. I use keyboard navigation. I own and
 > live at AW2 4LA, receive Universal Credit, and my boiler failed two days ago.
 > There is no heating or hot water. I have a £2,450 written estimate but no
-> photos. Build me a focused pathway and propose only answers supported by what
-> I said. Do not submit.
+> photos.
 
 The opening description supports exactly ten proposals. The agent must not infer
 the ownership type, ownership evidence, savings band, temporary-heating answer,

@@ -100,8 +100,10 @@ Target video length: 2:20–2:45, narrated, public YouTube URL.
 
 ## Submission evidence
 
-- Public static URL with the exact release commit
-- Public repository with MIT licence and build instructions
+- [x] Public static URL deployed from `main`:
+      <https://fortydegrees.github.io/right-questions-webmcp/>
+- [x] Public repository with MIT licence and build instructions:
+      <https://github.com/fortydegrees/right-questions-webmcp>
 - 3:2 hero image from supported WebMCP state
 - Standard-form screenshot
 - Personal-pathway screenshot
@@ -112,5 +114,20 @@ Target video length: 2:20–2:45, narrated, public YouTube URL.
 
 ## Final authority gate
 
-Repository publication, deployment, video publication, Devpost edits, rules
-checkbox, and final Submit remain subject to David's explicit approval.
+David approved repository publication and deployment on 3 September 2026.
+Video publication, Devpost edits, the rules checkbox, and final Submit remain
+subject to separate explicit approval.
+
+## Public release proof — 3 September 2026
+
+- Initial GitHub Pages workflow run `33768538471`, attempt 2: successful.
+- Chrome 152 on macOS returned exactly six tools from
+  `document.modelContext.getTools()` and no submission tool.
+- Native `executeTool()` calls proved inspection, presentation-only assistance,
+  ten proposals with `stored: 0`, deterministic validation, and review with
+  `availableToAgent: false`.
+- The human confirmed proposals and six remaining decisions through visible
+  controls; the resolved route contained 16 of 34 questions and excluded 18.
+- The final review exposed one visible human submit button.
+- The 390px public view had no horizontal overflow; no page exceptions or
+  console errors were reported.

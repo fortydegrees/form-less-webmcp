@@ -78,7 +78,10 @@ Testing instructions:
 
 Agents or clients tested:
 
-> `[FINALISE AFTER RELEASE QA: exact ChatGPT desktop app/client, model and version; Chrome version and WebMCP inspection method]`
+> Chrome 152 on macOS with WebMCP testing enabled. We inspected the six native
+> tools through `document.modelContext.getTools()` and exercised the complete
+> contract through `executeTool()`. `[ADD CHATGPT DESKTOP CLIENT/MODEL AFTER
+> DAVID'S PUBLIC-URL TEST]`
 
 AI tools used:
 
@@ -201,8 +204,17 @@ for people and expose it safely to agents.**
 Do not finalise these until evidence exists:
 
 - thumbnail
-- live URL and deployment ID/runtime proof
-- public repository URL and visible licence detection
 - exact ChatGPT app/client/model/version used for WebMCP QA
 - public YouTube URL, duration and audio check
 - image gallery selection and captions
+
+Verified release evidence:
+
+- Initial GitHub Pages workflow: `33768538471`, attempt 2, successful
+- Live URL: `https://fortydegrees.github.io/right-questions-webmcp/`
+- Repository: `https://github.com/fortydegrees/right-questions-webmcp`
+- Repository visibility: public
+- Detected licence: MIT (`SPDX MIT`)
+- Chrome 152 public-runtime journey: six tools, ten proposals with `stored: 0`,
+  16-question resolved route, 18 excluded branches, valid review,
+  `availableToAgent: false`, one visible human submit button
