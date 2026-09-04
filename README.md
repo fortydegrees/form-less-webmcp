@@ -72,8 +72,6 @@ Use the ChatGPT desktop built-in browser with Site Tools enabled:
 The agent only stages facts the applicant has already supplied. Nothing enters
 the application until the person accepts each suggestion.
 
-![Suggested answers awaiting human confirmation, with every current answer still shown as not answered](docs/assets/proposals-awaiting-confirmation.png)
-
 Chrome 146 or later can also expose the tools with **WebMCP for testing**
 enabled, although the flag provides the API rather than an agent. The complete
 human form still works when Site Tools are unavailable.
