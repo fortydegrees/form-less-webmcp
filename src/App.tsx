@@ -354,6 +354,7 @@ function AssistedExperience() {
   const [proposalBatch, setProposalBatch] = useState<readonly PendingAnswerProposal[]>(() => [...state.pendingProposals])
   const [proposalDecisions, setProposalDecisions] = useState<Partial<Record<QuestionId, 'accepted' | 'rejected'>>>({})
   const [reviewingProposals, setReviewingProposals] = useState(state.pendingProposals.length > 0)
+  const [showHumanHandoff, setShowHumanHandoff] = useState(false)
   const previousActiveQuestionId = useRef(activeQuestionId)
   const previousPendingCount = useRef(state.pendingProposals.length)
   const step = activeQuestionId
@@ -378,6 +379,7 @@ function AssistedExperience() {
   }, [activeQuestionId, state.assistance.reducedMotion])
 
   function continueRoute() {
+    setShowHumanHandoff(false)
     const nextQuestionId = applicationStore.getStep()?.question.id ?? null
     if (nextQuestionId === activeQuestionId) {
       focusAndReveal('focused-question-title', state.assistance.reducedMotion)
@@ -402,12 +404,9 @@ function AssistedExperience() {
 
   function finishProposalReview() {
     setReviewingProposals(false)
+    setShowHumanHandoff(true)
     setActiveQuestionId(applicationStore.getStep()?.question.id ?? null)
   }
-
-  const hasReviewedAgentAnswers = state.history.some((entry) =>
-    entry.action === 'You confirmed an agent proposal' || entry.action === 'You rejected an agent proposal',
-  )
 
   return (
     <section className="assisted-shell" aria-labelledby="pathway-title">
@@ -439,9 +438,8 @@ function AssistedExperience() {
           )}
           <div className="assisted-grid">
             <div className="focus-workspace">
-              {hasReviewedAgentAnswers && step && <HumanHandoff remainingCount={pathway.remainingRelevant} nextQuestion={step.question.label} />}
               {state.validationVisible && issues.length > 0 && <IssueSummary issues={issues} />}
-              {step ? <FocusedQuestion step={step} onContinue={continueRoute} /> : <PathwayComplete />}
+              {step ? <FocusedQuestion step={step} onContinue={continueRoute} handoff={showHumanHandoff ? { remainingCount: pathway.remainingRelevant, nextQuestion: step.question.label } : undefined} /> : <PathwayComplete />}
             </div>
             <aside className="case-trail">
               <PathwayMap />
@@ -515,7 +513,7 @@ function HumanHandoff({ remainingCount, nextQuestion }: { remainingCount: number
   return <section className="human-handoff" aria-label="Questions that still need you"><p className="eyebrow">Now it’s your turn</p><strong>{remainingCount} questions still need you</strong><span>Your agent left these blank because your message did not contain the answer. Start with: “{nextQuestion}”</span></section>
 }
 
-function FocusedQuestion({ step, onContinue }: { step: NonNullable<ReturnType<typeof getApplicationStep>>; onContinue: () => void }) {
+function FocusedQuestion({ step, onContinue, handoff }: { step: NonNullable<ReturnType<typeof getApplicationStep>>; onContinue: () => void; handoff?: { remainingCount: number; nextQuestion: string } }) {
   const state = applicationStore.getSnapshot()
   const pathway = getPathway(state)
   const position = pathway.relevantQuestionIds.indexOf(step.question.id) + 1
@@ -523,6 +521,7 @@ function FocusedQuestion({ step, onContinue }: { step: NonNullable<ReturnType<ty
   const hasAnswer = step.currentValue !== null && String(step.currentValue).trim().length > 0
   return (
     <section className="focus-card" aria-labelledby="focused-question-title" data-focus-region>
+      {handoff && <HumanHandoff remainingCount={handoff.remainingCount} nextQuestion={handoff.nextQuestion} />}
       <div className="focus-card__meta"><span>{step.sectionTitle}</span><span>Question {position} of {pathway.relevantQuestionIds.length}</span></div>
       <div className="focus-progress" role="progressbar" aria-label={`${pathway.answeredRelevant} of ${pathway.relevantQuestionIds.length} relevant answers complete`} aria-valuemin={0} aria-valuemax={pathway.relevantQuestionIds.length} aria-valuenow={pathway.answeredRelevant}><span style={{ width: `${(pathway.answeredRelevant / pathway.relevantQuestionIds.length) * 100}%` }} /></div>
       {state.assistance.plainLanguage && <p className="why-asked"><strong>Why you are seeing this</strong>{step.whyAsked}</p>}
