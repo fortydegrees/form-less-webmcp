@@ -26,7 +26,7 @@ The applicant keeps control of their answers and the final submission.
   </tr>
   <tr>
     <td><img src="docs/assets/standard-application.jpg" alt="The complete application showing ownership choices and conditional follow-up groups"></td>
-    <td><img src="docs/assets/personal-pathway.jpg" alt="The focused pathway showing 34 possible questions reduced to 16, with 18 questions not needed"></td>
+    <td><img src="docs/assets/form-less-personal-pathway.jpg" alt="The focused pathway showing 34 possible questions reduced to 16, with 18 questions not needed"></td>
   </tr>
   <tr>
     <td>Five sections covering every ownership, finance, repair and evidence branch.</td>
