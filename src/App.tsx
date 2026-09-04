@@ -471,6 +471,17 @@ function ProposalQueue({ proposals, decisions, pendingCount, remainingCount, onD
     <section className="proposal-queue" aria-labelledby="proposal-title" data-focus-region>
       <header><span className="agent-orb" aria-hidden="true">A</span><div><p className="eyebrow">Your agent found these details</p><h3 id="proposal-title" className="focus-target" tabIndex={-1}>Preview the suggested answers</h3><p>This is how the information will appear in your application. Review it before anything is added.</p></div><span className="human-only">Your decision</span></header>
       <div className="proposal-review-grid">
+        <aside className="proposal-review-panel" aria-label="Suggestion review progress">
+          <p className="eyebrow">Review progress</p>
+          <strong className="proposal-review-count">{acceptedCount} of {proposals.length}</strong>
+          <span>answers added</span>
+          <div className="proposal-review-progress" role="progressbar" aria-label={`${acceptedCount + rejectedCount} of ${proposals.length} suggestions reviewed`} aria-valuemin={0} aria-valuemax={proposals.length} aria-valuenow={acceptedCount + rejectedCount}><span style={{ width: `${((acceptedCount + rejectedCount) / proposals.length) * 100}%` }} /></div>
+          {pendingCount > 0 ? (
+            <><p>{acceptedCount === 0 ? 'Nothing has been added yet.' : `${pendingCount} ${pendingCount === 1 ? 'suggestion remains' : 'suggestions remain'} to review.`}</p><button className="button button--human" type="button" onClick={onAcceptRemaining}>Accept {pendingCount === proposals.length ? 'all' : `remaining ${pendingCount}`} {pendingCount === 1 ? 'suggestion' : 'suggestions'}</button><small>You can also review each field individually.</small></>
+          ) : (
+            <><p><strong>{acceptedCount} added</strong>{rejectedCount > 0 ? ` · ${rejectedCount} not used` : ''}. Your agent has used the facts it knew.</p><button className="button button--primary" type="button" onClick={onContinue}>Continue to {remainingCount} questions</button><small>The remaining answers need information only you can provide.</small></>
+          )}
+        </aside>
         <div className="proposal-list" aria-label="Suggested form answers">
           {proposals.map((proposal) => {
           const question = getQuestion(proposal.questionId)
@@ -495,17 +506,6 @@ function ProposalQueue({ proposals, decisions, pendingCount, remainingCount, onD
           )
           })}
         </div>
-        <aside className="proposal-review-panel" aria-label="Suggestion review progress">
-          <p className="eyebrow">Review progress</p>
-          <strong className="proposal-review-count">{acceptedCount} of {proposals.length}</strong>
-          <span>answers added</span>
-          <div className="proposal-review-progress" role="progressbar" aria-label={`${acceptedCount + rejectedCount} of ${proposals.length} suggestions reviewed`} aria-valuemin={0} aria-valuemax={proposals.length} aria-valuenow={acceptedCount + rejectedCount}><span style={{ width: `${((acceptedCount + rejectedCount) / proposals.length) * 100}%` }} /></div>
-          {pendingCount > 0 ? (
-            <><p>{acceptedCount === 0 ? 'Nothing has been added yet.' : `${pendingCount} ${pendingCount === 1 ? 'suggestion remains' : 'suggestions remain'} to review.`}</p><button className="button button--human" type="button" onClick={onAcceptRemaining}>Accept {pendingCount === proposals.length ? 'all' : `remaining ${pendingCount}`} {pendingCount === 1 ? 'suggestion' : 'suggestions'}</button><small>You can also review each field individually.</small></>
-          ) : (
-            <><p><strong>{acceptedCount} added</strong>{rejectedCount > 0 ? ` · ${rejectedCount} not used` : ''}. Your agent has used the facts it knew.</p><button className="button button--primary" type="button" onClick={onContinue}>Continue to {remainingCount} questions</button><small>The remaining answers need information only you can provide.</small></>
-          )}
-        </aside>
       </div>
     </section>
   )
