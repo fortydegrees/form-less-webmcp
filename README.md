@@ -60,14 +60,16 @@ Use the ChatGPT desktop built-in browser with Site Tools enabled:
    > electric heaters. I have a £2,450 written estimate from Alderwick Heating
    > Services but no photos.
 
-4. The site switches from the complete application to its focused layout. Ten
-   suggested answers appear, while every current answer remains
-   visibly **Not answered**.
+4. The site switches from the complete application to its focused layout.
+   Fifteen suggested answers appear, while the review panel shows that **0 of
+   15** have been added.
 5. Review and accept the suggestions in the webpage. The site recalculates the
-   pathway and removes branches that do not apply.
-6. Ask the agent to validate and review the application. It can return official
-   rules and deterministic issues, but it cannot make the declaration or press
-   **Submit application**.
+   pathway, removes branches that do not apply and leaves only the applicant's
+   declaration. All fifteen previous answers remain available to review or
+   change.
+6. Make the declaration, then ask the agent to validate and review the
+   application. It can return official rules and deterministic issues, but it
+   cannot make the declaration or press **Submit application**.
 
 The agent only stages facts the applicant has already supplied. Nothing enters
 the application until the person accepts each suggestion.
@@ -149,6 +151,18 @@ GitHub Pages.
 - Browser-native tool registration in [`src/webmcp.ts`](src/webmcp.ts).
 - Vitest coverage for schema integrity, branching, policy rules, proposal
   consent, generated tool schemas and the absent submission capability.
+
+The six definitions are registered with the browser's WebMCP API in
+[`src/webmcp.ts`](src/webmcp.ts):
+
+```ts
+const context = documentObject.modelContext
+const ready = Promise.all(
+  webMcpTools.map((tool) =>
+    context.registerTool(tool, { signal: controller.signal }),
+  ),
+).then(() => undefined)
+```
 
 Built with Codex as the implementation partner for the application, tests and
 QA. The product idea, applicant scenario, authority boundaries and release
