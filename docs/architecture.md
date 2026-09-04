@@ -1,6 +1,6 @@
 # Architecture
 
-Right Questions uses one service-owned contract to power the ordinary form, a
+Form Less uses one service-owned contract to power the ordinary form, a
 focused personal pathway, deterministic validation and six WebMCP tools.
 
 ```mermaid

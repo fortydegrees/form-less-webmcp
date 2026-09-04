@@ -1,18 +1,20 @@
-# Right Questions
+# Form Less
 
-[![Test, lint, build and deploy](https://github.com/fortydegrees/right-questions-webmcp/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/fortydegrees/right-questions-webmcp/actions/workflows/deploy-pages.yml)
+[![Test, lint, build and deploy](https://github.com/fortydegrees/form-less-webmcp/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/fortydegrees/form-less-webmcp/actions/workflows/deploy-pages.yml)
 
 **An entry for the [OpenAI WebMCP Hackathon](https://webmcp.devpost.com/).**
 
+**Same service. Less form.**
+
 A public-service form can be well designed and still ask one person to navigate
-every possible route. Right Questions lets a visitor's agent read the site's
+every possible route. Form Less lets a visitor's agent read the site's
 own form structure and turn a 34-question council application into a shorter,
 relevant route.
 
 The council site keeps control of its rules, validation and interface. The
 applicant keeps control of their answers and the final submission.
 
-[Try the live application](https://fortydegrees.github.io/right-questions-webmcp/)
+[Try the live application](https://fortydegrees.github.io/form-less-webmcp/)
 
 ## Before and after
 
@@ -44,7 +46,7 @@ applicant keeps control of their answers and the final submission.
 
 Use the ChatGPT desktop built-in browser with Site Tools enabled:
 
-1. Open the [live application](https://fortydegrees.github.io/right-questions-webmcp/).
+1. Open the [live application](https://fortydegrees.github.io/form-less-webmcp/).
 2. Open **Site tools → Available site tools** and confirm that six tools are
    listed. The green **WebMCP · 6 tools** button on the page describes their
    roles and confirms that no submission tool exists.
@@ -148,7 +150,7 @@ decisions were human-directed. No model or external API runs inside the shipped
 site.
 
 Alderwick Council and every policy, applicant detail and reference number in
-the demo are fictional. Right Questions is not a real application or source of
+the demo are fictional. Form Less is not a real application or source of
 eligibility advice.
 
 ## Licence

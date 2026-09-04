@@ -1,8 +1,8 @@
-# Right Questions — contributor guidance
+# Form Less — contributor guidance
 
 ## Product contract
 
-Right Questions is a fictional public-service application demonstrating a
+Form Less is a fictional public-service application demonstrating a
 schema-driven WebMCP interface. Read `README.md` and `docs/architecture.md`
 before material changes.
 
