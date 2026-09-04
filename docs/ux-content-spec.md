@@ -49,15 +49,16 @@ The agent must call site tools rather than simulate clicks.
 
 ## Canonical demo request
 
-> Use this site's tools—not browser clicks. I use keyboard navigation. I own and
-> live at AW2 4LA, receive Universal Credit, and my boiler failed two days ago.
-> There is no heating or hot water. I have a £2,450 written estimate but no
-> photos.
+> Use this site's tools—not browser clicks. I use keyboard navigation. I am the
+> sole owner and live at AW2 4LA, with proof of ownership ready. I receive
+> Universal Credit, have under £6,000 in savings, and my boiler failed two days
+> ago. There is no heating or hot water, but I have temporary electric heaters.
+> I have a £2,450 written estimate from Alderwick Heating Services but no photos.
 
-The opening description supports exactly ten proposals. The agent must not infer
-the ownership type, ownership evidence, savings band, temporary-heating answer,
-contractor name, or applicant declaration. Those six decisions remain visible
-for the applicant. After the route is resolved, 16 of 34 questions apply.
+The opening description supports exactly fifteen proposals. The applicant must
+review them before anything is stored. The declaration remains unavailable to
+the agent and is the only question left for the applicant. After the route is
+resolved, 16 of 34 questions apply.
 
 ## Visual language
 

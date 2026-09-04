@@ -173,7 +173,7 @@ describe('agent proposals and human decisions', () => {
       { questionId: 'repair_type', value: 'heating' },
       { questionId: 'repair_type', value: 'electrics' },
     ])).toThrowError(expect.objectContaining({ code: 'duplicate_proposal' }))
-    expect(() => proposeAnswers(createInitialState(), Array.from({ length: 11 }, () => ({ questionId: 'repair_type', value: 'heating' })))).toThrowError(expect.objectContaining({ code: 'invalid_proposals' }))
+    expect(() => proposeAnswers(createInitialState(), Array.from({ length: 16 }, () => ({ questionId: 'repair_type', value: 'heating' })))).toThrowError(expect.objectContaining({ code: 'invalid_proposals' }))
     const pending = proposeAnswers(createInitialState(), [{ questionId: 'repair_type', value: 'heating' }])
     expect(() => proposeAnswers(pending, [{ questionId: 'tenure', value: 'owner_occupier' }])).toThrowError(expect.objectContaining({ code: 'proposal_pending' }))
   })
@@ -209,9 +209,9 @@ describe('deterministic rules and submission boundary', () => {
     expect(validateApplication(state).map((issue) => issue.code)).toContain('photographs_not_usable')
   })
 
-  it('maps ten supplied facts while leaving six decisions to the applicant', () => {
+  it('maps every supplied fact while leaving only the declaration to the applicant', () => {
     let state = proposeAnswers(createInitialState(), demoAgentProposals)
-    expect(state.pendingProposals).toHaveLength(10)
+    expect(state.pendingProposals).toHaveLength(15)
     expect(state.answers).toEqual({})
     for (const proposal of [...state.pendingProposals]) state = confirmProposal(state, proposal.questionId)
     const pathway = getPathway(state)
@@ -219,11 +219,11 @@ describe('deterministic rules and submission boundary', () => {
       totalQuestions: 34,
       relevantQuestionIds: expect.any(Array),
       notApplicableQuestionIds: expect.any(Array),
-      remainingRelevant: 6,
+      remainingRelevant: 1,
     })
     expect(pathway.relevantQuestionIds).toHaveLength(16)
-    expect(pathway.notApplicableQuestionIds).toHaveLength(16)
-    expect(pathway.undecidedQuestionIds).toHaveLength(2)
+    expect(pathway.notApplicableQuestionIds).toHaveLength(18)
+    expect(pathway.undecidedQuestionIds).toHaveLength(0)
   })
 
   it('keeps submission human-only and behind a passing visible review', () => {

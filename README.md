@@ -38,7 +38,7 @@ The applicant keeps control of their answers and the final submission.
 
 - **34 possible questions → 16 on the demo route → 18 not needed** once
   the applicant confirms the routing choices.
-- **10 answers proposed → 0 stored** until the applicant reviews and accepts
+- **15 answers proposed → 0 stored** until the applicant reviews and accepts
   them.
 - **6 WebMCP tools → 0 submission tools.** The agent can inspect, adapt,
   explain, propose, validate and review. It cannot declare or submit.
@@ -53,10 +53,12 @@ Use the ChatGPT desktop built-in browser with Site Tools enabled:
    roles and confirms that no submission tool exists.
 3. Send this in the same chat:
 
-   > Use this site's tools, not browser clicks. I use keyboard navigation. I
-   > own and live at AW2 4LA, receive Universal Credit, and my boiler failed two
-   > days ago. There is no heating or hot water. I have a £2,450 written
-   > estimate but no photos.
+   > Use this site's tools, not browser clicks. I use keyboard navigation. I am
+   > the sole owner and live at AW2 4LA, with proof of ownership ready. I
+   > receive Universal Credit, have under £6,000 in savings, and my boiler
+   > failed two days ago. There is no heating or hot water, but I have temporary
+   > electric heaters. I have a £2,450 written estimate from Alderwick Heating
+   > Services but no photos.
 
 4. The site switches from the complete application to its focused layout. Ten
    suggested answers appear, while every current answer remains
@@ -70,7 +72,7 @@ Use the ChatGPT desktop built-in browser with Site Tools enabled:
 The agent only stages facts the applicant has already supplied. Nothing enters
 the application until the person accepts each suggestion.
 
-![Ten suggested answers awaiting human confirmation, with every current answer still shown as not answered](docs/assets/proposals-awaiting-confirmation.png)
+![Suggested answers awaiting human confirmation, with every current answer still shown as not answered](docs/assets/proposals-awaiting-confirmation.png)
 
 Chrome 146 or later can also expose the tools with **WebMCP for testing**
 enabled, although the flag provides the API rather than an agent. The complete
@@ -109,7 +111,7 @@ model.
 - `inspect_application` returns the full structured contract and current state.
 - `configure_assistance` activates approved presentation preferences without
   changing an answer.
-- `propose_answers` stages up to ten schema-valid suggestions for human review.
+- `propose_answers` stages up to fifteen schema-valid suggestions for human review.
 - `explain_requirement` returns a named site-authored rule and evidence advice.
 - `validate_application` runs deterministic schema and service-rule checks.
 - `get_application_review` returns the live pathway, answers, issues and the

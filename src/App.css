@@ -222,6 +222,15 @@
 .human-handoff .eyebrow { color: var(--human-dark); }
 .human-handoff strong { color: var(--midnight); font-size: 1.05rem; }
 .human-handoff span { color: #655633; font-size: .78rem; line-height: 1.48; }
+.confirmed-answer-summary { margin: 0 0 22px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.confirmed-answer-summary summary { padding: 13px 0; color: var(--agent-dark); font-size: .78rem; font-weight: 720; cursor: pointer; }
+.confirmed-answer-summary > div { max-height: 340px; overflow: auto; border-top: 1px solid var(--line); }
+.confirmed-answer-summary > div > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px; align-items: center; padding: 11px 4px; border-bottom: 1px solid var(--line); }
+.confirmed-answer-summary > div > div:last-child { border-bottom: 0; }
+.confirmed-answer-summary span, .confirmed-answer-summary strong, .confirmed-answer-summary small { display: block; min-width: 0; }
+.confirmed-answer-summary strong { color: var(--ink); font-size: .72rem; }
+.confirmed-answer-summary small { margin-top: 2px; color: var(--muted); font-size: .72rem; overflow-wrap: anywhere; }
+.confirmed-answer-summary .text-button { font-size: .7rem; }
 
 .case-trail { display: grid; align-content: start; gap: 0; background: white; }
 .rail-card { padding: 22px; border-bottom: 1px solid var(--line); }

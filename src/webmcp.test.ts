@@ -30,7 +30,7 @@ describe('generated WebMCP contract', () => {
     const schemaText = JSON.stringify(proposalSchema)
     expect(schemaText).toContain('repair_description')
     expect(schemaText).not.toContain('declaration_accuracy')
-    expect(proposalSchema.properties.proposals.maxItems).toBe(10)
+    expect(proposalSchema.properties.proposals.maxItems).toBe(15)
   })
 
   it('lets an agent inspect structure and conditional logic without scraping the DOM', async () => {

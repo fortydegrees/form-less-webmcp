@@ -21,7 +21,7 @@ import './App.css'
 type WebMcpStatus = 'checking' | 'supported' | 'unsupported' | 'error'
 
 const canonicalPrompt =
-  'Use this site’s tools, not browser clicks. I use keyboard navigation. I own and live at AW2 4LA, receive Universal Credit, and my boiler failed two days ago. There is no heating or hot water. I have a £2,450 written estimate but no photos.'
+  'Use this site’s tools, not browser clicks. I use keyboard navigation. I am the sole owner and live at AW2 4LA, with proof of ownership ready. I receive Universal Credit, have under £6,000 in savings, and my boiler failed two days ago. There is no heating or hot water, but I have temporary electric heaters. I have a £2,450 written estimate from Alderwick Heating Services but no photos.'
 
 function useWebMcpRegistration(): WebMcpStatus {
   const [status, setStatus] = useState<WebMcpStatus>(() =>
@@ -408,6 +408,11 @@ function AssistedExperience() {
     setActiveQuestionId(applicationStore.getStep()?.question.id ?? null)
   }
 
+  function editAnswer(questionId: QuestionId) {
+    setShowHumanHandoff(false)
+    setActiveQuestionId(questionId)
+  }
+
   return (
     <section className="assisted-shell" aria-labelledby="pathway-title">
       <header className="pathway-header" data-focus-region>
@@ -439,7 +444,7 @@ function AssistedExperience() {
           <div className="assisted-grid">
             <div className="focus-workspace">
               {state.validationVisible && issues.length > 0 && <IssueSummary issues={issues} />}
-              {step ? <FocusedQuestion step={step} onContinue={continueRoute} handoff={showHumanHandoff ? { remainingCount: pathway.remainingRelevant, nextQuestion: step.question.label } : undefined} /> : <PathwayComplete />}
+              {step ? <FocusedQuestion step={step} onContinue={continueRoute} onEditAnswer={editAnswer} handoff={showHumanHandoff ? { remainingCount: pathway.remainingRelevant, nextQuestion: step.question.label, humanOnly: !step.question.agentWritable } : undefined} /> : <PathwayComplete />}
             </div>
             <aside className="case-trail">
               <PathwayMap />
@@ -477,7 +482,7 @@ function ProposalQueue({ proposals, decisions, pendingCount, remainingCount, onD
           {pendingCount > 0 ? (
             <><p>{acceptedCount === 0 ? 'Nothing has been added yet.' : `${pendingCount} ${pendingCount === 1 ? 'suggestion remains' : 'suggestions remain'} to review.`}</p><button className="button button--human" type="button" onClick={onAcceptRemaining}>Accept {pendingCount === proposals.length ? 'all' : `remaining ${pendingCount}`} {pendingCount === 1 ? 'suggestion' : 'suggestions'}</button><small>You can also review each field individually.</small></>
           ) : (
-            <><p><strong>{acceptedCount} added</strong>{rejectedCount > 0 ? ` · ${rejectedCount} not used` : ''}. Your agent has used the facts it knew.</p><button className="button button--primary" type="button" onClick={onContinue}>Continue to {remainingCount} questions</button><small>The remaining answers need information only you can provide.</small></>
+            <><p><strong>{acceptedCount} added</strong>{rejectedCount > 0 ? ` · ${rejectedCount} not used` : ''}. Your agent has used the facts it knew.</p><button className="button button--primary" type="button" onClick={onContinue}>{remainingCount === 1 ? 'Continue to declaration' : `Continue to ${remainingCount} questions`}</button><small>{remainingCount === 1 ? 'The declaration always stays with you.' : 'The remaining answers need information only you can provide.'}</small></>
           )}
         </aside>
         <div className="proposal-list" aria-label="Suggested form answers">
@@ -509,11 +514,11 @@ function ProposalQueue({ proposals, decisions, pendingCount, remainingCount, onD
   )
 }
 
-function HumanHandoff({ remainingCount, nextQuestion }: { remainingCount: number; nextQuestion: string }) {
-  return <section className="human-handoff" aria-label="Questions that still need you"><p className="eyebrow">Now it’s your turn</p><strong>{remainingCount} questions still need you</strong><span>Your agent left these blank because your message did not contain the answer. Start with: “{nextQuestion}”</span></section>
+function HumanHandoff({ remainingCount, nextQuestion, humanOnly }: { remainingCount: number; nextQuestion: string; humanOnly: boolean }) {
+  return <section className="human-handoff" aria-label="Questions that still need you"><p className="eyebrow">Now it’s your turn</p><strong>{humanOnly ? 'One final step needs you' : `${remainingCount} ${remainingCount === 1 ? 'question still needs' : 'questions still need'} you`}</strong><span>{humanOnly ? 'The agent has completed its part. Only you can confirm the declaration.' : `Your agent left these blank because your message did not contain the answer. Start with: “${nextQuestion}”`}</span></section>
 }
 
-function FocusedQuestion({ step, onContinue, handoff }: { step: NonNullable<ReturnType<typeof getApplicationStep>>; onContinue: () => void; handoff?: { remainingCount: number; nextQuestion: string } }) {
+function FocusedQuestion({ step, onContinue, onEditAnswer, handoff }: { step: NonNullable<ReturnType<typeof getApplicationStep>>; onContinue: () => void; onEditAnswer: (questionId: QuestionId) => void; handoff?: { remainingCount: number; nextQuestion: string; humanOnly: boolean } }) {
   const state = applicationStore.getSnapshot()
   const pathway = getPathway(state)
   const position = pathway.relevantQuestionIds.indexOf(step.question.id) + 1
@@ -521,7 +526,8 @@ function FocusedQuestion({ step, onContinue, handoff }: { step: NonNullable<Retu
   const hasAnswer = step.currentValue !== null && String(step.currentValue).trim().length > 0
   return (
     <section className="focus-card" aria-labelledby="focused-question-title" data-focus-region>
-      {handoff && <HumanHandoff remainingCount={handoff.remainingCount} nextQuestion={handoff.nextQuestion} />}
+      {handoff && <HumanHandoff remainingCount={handoff.remainingCount} nextQuestion={handoff.nextQuestion} humanOnly={handoff.humanOnly} />}
+      <ConfirmedAnswerSummary currentQuestionId={step.question.id} onEdit={onEditAnswer} />
       <div className="focus-card__meta"><span>{step.sectionTitle}</span><span>Question {position} of {pathway.relevantQuestionIds.length}</span></div>
       <div className="focus-progress" role="progressbar" aria-label={`${pathway.answeredRelevant} of ${pathway.relevantQuestionIds.length} relevant answers complete`} aria-valuemin={0} aria-valuemax={pathway.relevantQuestionIds.length} aria-valuenow={pathway.answeredRelevant}><span style={{ width: `${(pathway.answeredRelevant / pathway.relevantQuestionIds.length) * 100}%` }} /></div>
       {state.assistance.plainLanguage && <p className="why-asked"><strong>Why you are seeing this</strong>{step.whyAsked}</p>}
@@ -529,6 +535,21 @@ function FocusedQuestion({ step, onContinue, handoff }: { step: NonNullable<Retu
       {step.question.requirementId && <RequirementCard requirementId={step.question.requirementId} />}
       <div className="form-actions"><button className="button button--primary" type="button" disabled={!hasAnswer} onClick={onContinue}>Continue</button><span>Your route updates from the answers you confirm.</span></div>
     </section>
+  )
+}
+
+function ConfirmedAnswerSummary({ currentQuestionId, onEdit }: { currentQuestionId: QuestionId; onEdit: (questionId: QuestionId) => void }) {
+  const state = applicationStore.getSnapshot()
+  const answered = getPathway(state).relevantQuestionIds.filter((questionId) => {
+    const value = state.answers[questionId]
+    return questionId !== currentQuestionId && value !== undefined && String(value).trim() !== ''
+  })
+  if (answered.length === 0) return null
+  return (
+    <details className="confirmed-answer-summary">
+      <summary>Review or change {answered.length} previous {answered.length === 1 ? 'answer' : 'answers'}</summary>
+      <div>{answered.map((questionId) => <div key={questionId}><span><strong>{getQuestion(questionId).shortLabel}</strong><small>{formatAnswer(questionId, state.answers[questionId] ?? '')}</small></span><button className="text-button" type="button" onClick={() => onEdit(questionId)}>Change</button></div>)}</div>
+    </details>
   )
 }
 

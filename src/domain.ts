@@ -145,14 +145,19 @@ export const completedDemoAnswers: Partial<Record<QuestionId, AnswerValue>> = {
 export const demoAgentProposals: readonly PendingAnswerProposal[] = [
   { questionId: 'property_postcode', value: 'AW2 4LA', rationale: 'You said the repair is at your Alderwick home.' },
   { questionId: 'tenure', value: 'owner_occupier', rationale: 'You said you own and live in the property.' },
+  { questionId: 'ownership_type', value: 'sole', rationale: 'You said you are the sole owner.' },
+  { questionId: 'ownership_evidence', value: 'ready', rationale: 'You said proof of ownership is ready.' },
   { questionId: 'financial_route', value: 'qualifying_benefit', rationale: 'You said you receive Universal Credit.' },
   { questionId: 'benefit_type', value: 'universal_credit', rationale: 'This is the benefit you named.' },
+  { questionId: 'savings_band', value: 'under_6000', rationale: 'You said your savings are under £6,000.' },
   { questionId: 'repair_type', value: 'heating', rationale: 'The reported problem is a failed boiler.' },
   { questionId: 'repair_description', value: 'The boiler stopped working two days ago. There is no heating or hot water.', rationale: 'This uses only the repair details you supplied.' },
   { questionId: 'problem_started', value: 'last_3_days', rationale: 'You said the boiler failed two days ago.' },
   { questionId: 'heating_status', value: 'none', rationale: 'You said there is no heating or hot water.' },
+  { questionId: 'temporary_heating', value: 'yes', rationale: 'You said you have temporary electric heaters.' },
   { questionId: 'estimated_cost', value: 2450, rationale: 'You said the written estimate is £2,450.' },
   { questionId: 'evidence_route', value: 'written_estimate', rationale: 'You said a written estimate is ready and no photographs are available.' },
+  { questionId: 'contractor_name', value: 'Alderwick Heating Services', rationale: 'This is the contractor named on your estimate.' },
 ]
 
 export function createInitialState(): ApplicationState {
@@ -244,7 +249,7 @@ export function proposeAnswers(
   state: ApplicationState,
   inputs: readonly { questionId: string; value: unknown; rationale?: unknown }[],
 ): ApplicationState {
-  if (inputs.length === 0 || inputs.length > 10) throw new DomainError('invalid_proposals', 'Propose between 1 and 10 answers at a time.')
+  if (inputs.length === 0 || inputs.length > 15) throw new DomainError('invalid_proposals', 'Propose between 1 and 15 answers at a time.')
   if (state.pendingProposals.length > 0) throw new DomainError('proposal_pending', 'The applicant must review the current proposals before more are added.')
 
   const seen = new Set<QuestionId>()
