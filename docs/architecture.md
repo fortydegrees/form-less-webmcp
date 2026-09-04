@@ -1,7 +1,9 @@
 # Architecture
 
-Form Less uses one service-owned contract to power the ordinary form, a
-focused personal pathway, deterministic validation and six WebMCP tools.
+Form Less is a reusable WebMCP pattern demonstrated through a fictional
+Alderwick Council service. One service-owned contract powers the ordinary
+form, a focused personal pathway, deterministic validation and six WebMCP
+tools. Alderwick's grant rules are example content rather than the product.
 
 ```mermaid
 flowchart LR

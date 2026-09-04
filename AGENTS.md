@@ -2,9 +2,9 @@
 
 ## Product contract
 
-Form Less is a fictional public-service application demonstrating a
-schema-driven WebMCP interface. Read `README.md` and `docs/architecture.md`
-before material changes.
+Form Less is a reusable WebMCP demonstrator presented through a fictional
+public-service application. Alderwick Council is the worked example, not the
+product. Read `README.md` and `docs/architecture.md` before material changes.
 
 The product has two non-negotiable authority boundaries:
 

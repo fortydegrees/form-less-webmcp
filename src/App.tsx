@@ -53,12 +53,12 @@ export default function App() {
 
   useEffect(() => {
     document.title = state.screen === 'submitted'
-      ? 'Demo submitted — Alderwick Home Support'
+      ? 'Form Less demo — Application received'
       : state.screen === 'review'
-        ? 'Check your answers — Alderwick Home Support'
+        ? 'Form Less demo — Check your answers'
         : state.assistance.active
-          ? 'Your personal pathway — Alderwick Home Support'
-          : 'Urgent home-repair grant — Alderwick Home Support'
+          ? 'Form Less demo — Your personal pathway'
+          : 'Form Less demo — Alderwick repair grant'
   }, [state.assistance.active, state.screen])
 
   useEffect(() => {
@@ -130,7 +130,7 @@ function focusAndReveal(id: string, reducedMotion: boolean) {
 }
 
 function PrototypeBanner() {
-  return <div className="prototype-banner"><div className="page-width"><strong>Demonstration service</strong><span>Alderwick is fictional. Nothing you enter leaves this page.</span></div></div>
+  return <div className="prototype-banner"><div className="page-width"><strong>Form Less · WebMCP demonstrator</strong><span>Alderwick Council is a fictional example. Nothing you enter leaves this page.</span></div></div>
 }
 
 function SiteHeader({ status, onOpenTools }: { status: WebMcpStatus; onOpenTools: () => void }) {
@@ -210,9 +210,9 @@ function AgentToolsDialog({ open, status, onClose }: { open: boolean; status: We
       <div className="tools-dialog__surface">
         <header className="tools-dialog__header">
           <div>
-            <p className="eyebrow">Agent tools for this service</p>
-            <h2 id="tools-dialog-title">This application supports WebMCP</h2>
-            <p id="tools-dialog-description">A compatible browser agent can read the form contract, request the council-approved focused layout, suggest answers and run official checks.</p>
+            <p className="eyebrow">How Form Less works</p>
+            <h2 id="tools-dialog-title">A fictional service with real WebMCP tools</h2>
+            <p id="tools-dialog-description">Alderwick Council is the worked example. Form Less exposes the site's own form contract and safe actions so a compatible browser agent can inspect the service, request its approved focused layout, stage supported answers and run the site's checks.</p>
           </div>
           <button className="dialog-close" type="button" onClick={closeDialog} aria-label="Close WebMCP information">×</button>
         </header>
@@ -554,5 +554,5 @@ function SuccessPanel() {
 }
 
 function SiteFooter() {
-  return <footer className="site-footer"><div className="page-width"><strong>Alderwick Council</strong><span>Fictional housing support demonstration</span></div></footer>
+  return <footer className="site-footer"><div className="page-width"><strong>Form Less</strong><span>WebMCP technology demonstrator · Alderwick Council is fictional</span></div></footer>
 }
