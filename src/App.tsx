@@ -10,6 +10,7 @@ import {
   requirements,
   sections,
   validateApplication,
+  type PendingAnswerProposal,
   type QuestionDefinition,
   type QuestionId,
   type ValidationIssue,
@@ -350,6 +351,9 @@ function AssistedExperience() {
   const pathway = getPathway(state)
   const suggestedStep = getApplicationStep(state)
   const [activeQuestionId, setActiveQuestionId] = useState<QuestionId | null>(() => suggestedStep?.question.id ?? null)
+  const [proposalBatch, setProposalBatch] = useState<readonly PendingAnswerProposal[]>(() => [...state.pendingProposals])
+  const [proposalDecisions, setProposalDecisions] = useState<Partial<Record<QuestionId, 'accepted' | 'rejected'>>>({})
+  const [reviewingProposals, setReviewingProposals] = useState(state.pendingProposals.length > 0)
   const previousActiveQuestionId = useRef(activeQuestionId)
   const previousPendingCount = useRef(state.pendingProposals.length)
   const step = activeQuestionId
@@ -358,11 +362,13 @@ function AssistedExperience() {
   const issues = state.validationVisible ? validateApplication(state) : []
 
   useEffect(() => {
-    if (previousPendingCount.current > 0 && state.pendingProposals.length === 0) {
-      setActiveQuestionId(applicationStore.getStep()?.question.id ?? null)
+    if (previousPendingCount.current === 0 && state.pendingProposals.length > 0) {
+      setProposalBatch([...state.pendingProposals])
+      setProposalDecisions({})
+      setReviewingProposals(true)
     }
     previousPendingCount.current = state.pendingProposals.length
-  }, [state.pendingProposals.length])
+  }, [state.pendingProposals])
 
   useEffect(() => {
     if (previousActiveQuestionId.current !== activeQuestionId) {
@@ -380,62 +386,133 @@ function AssistedExperience() {
     setActiveQuestionId(nextQuestionId)
   }
 
+  function decideProposal(questionId: QuestionId, decision: 'accepted' | 'rejected') {
+    setProposalDecisions((current) => ({ ...current, [questionId]: decision }))
+    if (decision === 'accepted') applicationStore.confirmAgentProposal(questionId)
+    else applicationStore.rejectAgentProposal(questionId)
+  }
+
+  function acceptRemainingProposals() {
+    const accepted = Object.fromEntries(
+      state.pendingProposals.map((proposal) => [proposal.questionId, 'accepted']),
+    ) as Partial<Record<QuestionId, 'accepted'>>
+    setProposalDecisions((current) => ({ ...current, ...accepted }))
+    applicationStore.confirmAllAgentProposals()
+  }
+
+  function finishProposalReview() {
+    setReviewingProposals(false)
+    setActiveQuestionId(applicationStore.getStep()?.question.id ?? null)
+  }
+
+  const hasReviewedAgentAnswers = state.history.some((entry) =>
+    entry.action === 'You confirmed an agent proposal' || entry.action === 'You rejected an agent proposal',
+  )
+
   return (
     <section className="assisted-shell" aria-labelledby="pathway-title">
       <header className="pathway-header" data-focus-region>
         <div><p className="eyebrow">Personalised view</p><h2 id="pathway-title" className="focus-target" tabIndex={-1}>Your application</h2><p>Based on the answers you confirm, this view keeps the questions and guidance that apply to you. The council’s rules have not changed.</p>{state.assistance.keyboardNavigation && <p className="pathway-keyboard-note"><strong>Keyboard route active.</strong> Use Tab between controls and arrow keys within answer choices.</p>}</div>
         <button className="text-button" type="button" onClick={() => applicationStore.configure({ active: false }, 'human')}>Return to standard form</button>
       </header>
-      <div className="pathway-metrics" aria-label="Personal pathway summary">
-        <div><strong>{pathway.totalQuestions}</strong><span>possible questions</span></div>
-        <div><strong>{pathway.relevantQuestionIds.length}</strong><span>questions on your route</span></div>
-        <div><strong>{pathway.notApplicableQuestionIds.length}</strong><span>questions not needed</span></div>
-        <div><strong>{pathway.remainingRelevant}</strong><span>answers left</span></div>
-        <div><strong>{pathway.documentsNeeded.length}</strong><span>documents to prepare</span></div>
-      </div>
-      {(state.pendingProposals.length > 0 || pathway.undecidedQuestionIds.length > 0) && (
-        <p className="route-note" role="status">
-          {state.pendingProposals.length > 0
-            ? `${state.pendingProposals.length} drafted answers are waiting for your review. They do not change the route until you accept them.`
-            : `${pathway.undecidedQuestionIds.length} possible follow-up ${pathway.undecidedQuestionIds.length === 1 ? 'is' : 'questions are'} waiting on your answers and ${pathway.undecidedQuestionIds.length === 1 ? 'is' : 'are'} not counted as removed.`}
-        </p>
+      {reviewingProposals && proposalBatch.length > 0 ? (
+        <ProposalQueue
+          proposals={proposalBatch}
+          decisions={proposalDecisions}
+          pendingCount={state.pendingProposals.length}
+          remainingCount={pathway.remainingRelevant}
+          onDecide={decideProposal}
+          onAcceptRemaining={acceptRemainingProposals}
+          onContinue={finishProposalReview}
+        />
+      ) : (
+        <>
+          <div className="pathway-metrics" aria-label="Personal pathway summary">
+            <div><strong>{pathway.totalQuestions}</strong><span>possible questions</span></div>
+            <div><strong>{pathway.relevantQuestionIds.length}</strong><span>questions on your route</span></div>
+            <div><strong>{pathway.notApplicableQuestionIds.length}</strong><span>questions not needed</span></div>
+            <div><strong>{pathway.remainingRelevant}</strong><span>answers left</span></div>
+            <div><strong>{pathway.documentsNeeded.length}</strong><span>documents to prepare</span></div>
+          </div>
+          {pathway.undecidedQuestionIds.length > 0 && (
+            <p className="route-note" role="status">{pathway.undecidedQuestionIds.length} possible follow-up {pathway.undecidedQuestionIds.length === 1 ? 'is' : 'questions are'} waiting on your answers and {pathway.undecidedQuestionIds.length === 1 ? 'is' : 'are'} not counted as removed.</p>
+          )}
+          <div className="assisted-grid">
+            <div className="focus-workspace">
+              {hasReviewedAgentAnswers && step && <HumanHandoff remainingCount={pathway.remainingRelevant} nextQuestion={step.question.label} />}
+              {state.validationVisible && issues.length > 0 && <IssueSummary issues={issues} />}
+              {step ? <FocusedQuestion step={step} onContinue={continueRoute} /> : <PathwayComplete />}
+            </div>
+            <aside className="case-trail">
+              <PathwayMap />
+              <EvidencePlan />
+              <ActivityTrail />
+            </aside>
+          </div>
+        </>
       )}
-      {state.pendingProposals.length > 0 && <ProposalQueue />}
-      <div className="assisted-grid">
-        <div className="focus-workspace">
-          {state.validationVisible && issues.length > 0 && <IssueSummary issues={issues} />}
-          {step ? <FocusedQuestion step={step} onContinue={continueRoute} /> : <PathwayComplete />}
+    </section>
+  )
+}
+
+function ProposalQueue({ proposals, decisions, pendingCount, remainingCount, onDecide, onAcceptRemaining, onContinue }: {
+  proposals: readonly PendingAnswerProposal[]
+  decisions: Partial<Record<QuestionId, 'accepted' | 'rejected'>>
+  pendingCount: number
+  remainingCount: number
+  onDecide: (questionId: QuestionId, decision: 'accepted' | 'rejected') => void
+  onAcceptRemaining: () => void
+  onContinue: () => void
+}) {
+  const state = applicationStore.getSnapshot()
+  const acceptedCount = Object.values(decisions).filter((decision) => decision === 'accepted').length
+  const rejectedCount = Object.values(decisions).filter((decision) => decision === 'rejected').length
+  return (
+    <section className="proposal-queue" aria-labelledby="proposal-title" data-focus-region>
+      <header><span className="agent-orb" aria-hidden="true">A</span><div><p className="eyebrow">Your agent found these details</p><h3 id="proposal-title" className="focus-target" tabIndex={-1}>Preview the suggested answers</h3><p>This is how the information will appear in your application. Review it before anything is added.</p></div><span className="human-only">Your decision</span></header>
+      <div className="proposal-review-grid">
+        <div className="proposal-list" aria-label="Suggested form answers">
+          {proposals.map((proposal) => {
+          const question = getQuestion(proposal.questionId)
+          const current = state.answers[proposal.questionId]
+          const decision = decisions[proposal.questionId]
+          const sectionTitle = sections.find((section) => section.questions.includes(proposal.questionId))?.title ?? 'Application'
+          return (
+            <article className="proposal-item" key={proposal.questionId} data-decision={decision ?? 'pending'}>
+              <p className="proposal-section">{sectionTitle}</p>
+              <h4>{question.label}</h4>
+              <p className="proposal-hint">{question.hint}</p>
+              <div className="proposal-value"><small>Suggested answer</small><strong>{formatAnswer(proposal.questionId, proposal.value)}</strong></div>
+              {proposal.rationale && <p className="proposal-rationale">{proposal.rationale}</p>}
+              <div className="proposal-actions">
+                {decision ? (
+                  <span className={`proposal-decision proposal-decision--${decision}`} role="status">{decision === 'accepted' ? `Added to application: ${formatAnswer(proposal.questionId, current ?? proposal.value)}` : 'Not used'}</span>
+                ) : (
+                  <><button className="button button--human" type="button" onClick={() => onDecide(proposal.questionId, 'accepted')}>Use this answer</button><button className="text-button" type="button" onClick={() => onDecide(proposal.questionId, 'rejected')}>Not right</button></>
+                )}
+              </div>
+            </article>
+          )
+          })}
         </div>
-        <aside className="case-trail">
-          <PathwayMap />
-          <EvidencePlan />
-          <ActivityTrail />
+        <aside className="proposal-review-panel" aria-label="Suggestion review progress">
+          <p className="eyebrow">Review progress</p>
+          <strong className="proposal-review-count">{acceptedCount} of {proposals.length}</strong>
+          <span>answers added</span>
+          <div className="proposal-review-progress" role="progressbar" aria-label={`${acceptedCount + rejectedCount} of ${proposals.length} suggestions reviewed`} aria-valuemin={0} aria-valuemax={proposals.length} aria-valuenow={acceptedCount + rejectedCount}><span style={{ width: `${((acceptedCount + rejectedCount) / proposals.length) * 100}%` }} /></div>
+          {pendingCount > 0 ? (
+            <><p>{acceptedCount === 0 ? 'Nothing has been added yet.' : `${pendingCount} ${pendingCount === 1 ? 'suggestion remains' : 'suggestions remain'} to review.`}</p><button className="button button--human" type="button" onClick={onAcceptRemaining}>Accept {pendingCount === proposals.length ? 'all' : `remaining ${pendingCount}`} {pendingCount === 1 ? 'suggestion' : 'suggestions'}</button><small>You can also review each field individually.</small></>
+          ) : (
+            <><p><strong>{acceptedCount} added</strong>{rejectedCount > 0 ? ` · ${rejectedCount} not used` : ''}. Your agent has used the facts it knew.</p><button className="button button--primary" type="button" onClick={onContinue}>Continue to {remainingCount} questions</button><small>The remaining answers need information only you can provide.</small></>
+          )}
         </aside>
       </div>
     </section>
   )
 }
 
-function ProposalQueue() {
-  const state = applicationStore.getSnapshot()
-  return (
-    <section className="proposal-queue" aria-labelledby="proposal-title" data-focus-region>
-      <header><span className="agent-orb" aria-hidden="true">A</span><div><p className="eyebrow">Answers waiting for you</p><h3 id="proposal-title" className="focus-target" tabIndex={-1}>Check {state.pendingProposals.length} suggested answers</h3><p>Your agent matched details you gave against the form. Nothing changes until you accept it.</p></div><span className="human-only">Your decision</span></header>
-      <div className="proposal-list">
-        {state.pendingProposals.map((proposal) => {
-          const question = getQuestion(proposal.questionId)
-          const current = state.answers[proposal.questionId]
-          return (
-            <article className="proposal-item" key={proposal.questionId}>
-              <div className="proposal-copy"><small>{question.shortLabel}</small><strong>{formatAnswer(proposal.questionId, proposal.value)}</strong>{proposal.rationale && <p>{proposal.rationale}</p>}<span>Current: {current === undefined ? 'Not answered' : formatAnswer(proposal.questionId, current)}</span></div>
-              <div className="proposal-actions"><button className="button button--human" type="button" onClick={() => applicationStore.confirmAgentProposal(proposal.questionId)}>Use this answer</button><button className="text-button" type="button" onClick={() => applicationStore.rejectAgentProposal(proposal.questionId)}>Not right</button></div>
-            </article>
-          )
-        })}
-      </div>
-      {state.pendingProposals.length > 1 && <div className="proposal-bulk"><p>Only use this after reading every suggestion.</p><button className="button button--human" type="button" onClick={() => applicationStore.confirmAllAgentProposals()}>Accept all {state.pendingProposals.length} suggestions</button></div>}
-    </section>
-  )
+function HumanHandoff({ remainingCount, nextQuestion }: { remainingCount: number; nextQuestion: string }) {
+  return <section className="human-handoff" aria-label="Questions that still need you"><p className="eyebrow">Now it’s your turn</p><strong>{remainingCount} questions still need you</strong><span>Your agent left these blank because your message did not contain the answer. Start with: “{nextQuestion}”</span></section>
 }
 
 function FocusedQuestion({ step, onContinue }: { step: NonNullable<ReturnType<typeof getApplicationStep>>; onContinue: () => void }) {
